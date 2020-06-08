@@ -6,6 +6,8 @@ Author: Tianjian Zhou
 Description: BaySIR 
 Depends: R (>= 3.5.1)
 License: GPL-3 | file LICENSE
+Imports: Rcpp (>= 0.12.9)
+LinkingTo: Rcpp, RcppArmadillo
 Encoding: UTF-8
 LazyData: true
 NeedsCompilation: yes
