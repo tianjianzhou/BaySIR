@@ -1,0 +1,12 @@
+Package: BaySIR
+Type: Package
+Title: BaySIR
+Version: 1.0
+Author: Tianjian Zhou
+Description: BaySIR 
+Depends: R (>= 3.5.1)
+License: GPL-3 | file LICENSE
+Encoding: UTF-8
+LazyData: true
+NeedsCompilation: yes
+Packaged: 2020-02-27 00:08:11 UTC
