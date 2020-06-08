@@ -1,0 +1,4 @@
+useDynLib(BaySIR)
+export(BaySIR_MCMC)
+import(Rcpp)
+import(RcppArmadillo)
