@@ -1,4 +1,4 @@
 useDynLib(BaySIR)
+importFrom(Rcpp, evalCpp)
+exportPattern("^[[:alpha:]]+")
 export(BaySIR_MCMC)
-import(Rcpp)
-import(RcppArmadillo)
