@@ -1,35 +1,76 @@
 
 
-library(Rcpp)
-library(RcppArmadillo)
+# library(Rcpp)
+# library(RcppArmadillo)
 # sourceCpp("fn_BaySIR_MCMC.cpp")
 
 
 
-BaySIR_MCMC = function(confirmed_cases_cum, N, 
+BaySIR_MCMC = function(B, I_D_0, N, 
+  confirmed_cases_cum = NULL,
+  X = NULL, Y = NULL, 
   kappa = 1,
   niter = 1000, burnin = 10000, thin = 20, Delta = (1.5)^(0:9)) {
   
-  
-  print(sprintf("BaySIR: Posterior simulation started. Date: %s.", date()))
+  if (missing(B) | missing(I_D_0)) {
+    
+    if (!is.null(confirmed_cases_cum)) {
+      B = confirmed_cases_cum[-1] - head(confirmed_cases_cum, -1)
+      I_D_0 = confirmed_cases_cum[1]
+    } else {
+      stop("Must specify (B, I_D_0) or confirmed_cases_cum.")
+    }
 
-  # B: length T vector
-  B = confirmed_cases_cum[-1] - head(confirmed_cases_cum, -1)
-  # Avoid gamma being 0
+  }
+
+  if (any(B < 0)) {
+    stop("Error: some daily confirmed cases (B) are negative.")
+  }
+
+  if (I_D_0 <= 0) {
+    stop("Error: initial number of documented infections (I_D[0]) is not positive.")
+  }
+
+  if (missing(N)) {
+    stop("Must specify N (population size).")
+  }
+  
+  # B: length T + 1 vector, avoid gamma being 0
   B[B == 0] = 1
   T = length(B) - 1
 
   # may change 
-  X = cbind(rep(1, T + 1), 0:T)
+  if (is.null(X)) {
+    X = cbind(rep(1, T + 1), 0:T)
+  }
+  
+  if (is.null(Y)) {
+    Y = as.matrix(rep(1, T + 1))
+  }
   # Y = cbind(rep(1, T + 1), 0:T) 
   # Y = as.matrix(log(z)) 
-  Y = as.matrix(rep(1, T + 1))
+
+  if (!is.matrix(X)) {
+    stop("X must be a matrix.")
+  }
+
+  if (!is.matrix(Y)) {
+    stop("Y must be a matrix.")
+  }
+
+  if (dim(X)[1] != (T + 1)) {
+    stop("Dimension of X does not match with the time series.")
+  }
+  
+  if (dim(Y)[1] != (T + 1)) {
+    stop("Dimension of Y does not match with the time series.")
+  }
 
   Q = dim(X)[2]
   K = dim(Y)[2]
   
   M = length(Delta)
-
+  
   #################################################################
   # Setting hyperparameters
   #################################################################
@@ -70,7 +111,7 @@ BaySIR_MCMC = function(confirmed_cases_cum, N,
   #################################################################
   alpha_spls[1] = nu_alpha_2 / nu_alpha_1 
 
-  I_D_spls[1, 1] = confirmed_cases_cum[1]
+  I_D_spls[1, 1] = I_D_0
   R_D_spls[1, 1] = 0
 
   for (t in 1:T) {
@@ -111,7 +152,7 @@ BaySIR_MCMC = function(confirmed_cases_cum, N,
 
     BRN_start = BRN_start + 0.05
     BRN_end = BRN_end + 0.05
-    print(sprintf("Try again, BRN_start = %.2f, BRN_end = %.2f", BRN_start, BRN_end))
+    # print(sprintf("Try again, BRN_start = %.2f, BRN_end = %.2f", BRN_start, BRN_end))
 
   }
   
@@ -159,13 +200,16 @@ BaySIR_MCMC = function(confirmed_cases_cum, N,
   sigma_lambda_PT[] = sigma_lambda_spls[1]
   
   alpha_PT[] = alpha_spls[1]
+  
 
+  print(sprintf("BaySIR: Posterior simulation started. Date: %s.", date()))
+  
   #################################################################
   # MCMC burn-in
   #################################################################
   print(sprintf("BaySIR: Burn-in started (%d iterations). Date: %s.", burnin, date()))
   
-  output_C = BaySIR_MCMC_cpp(S = S_PT, 
+  output_C = .Call("BaySIR_MCMC_cpp", S = S_PT, 
                       I_U = I_U_PT,
                       I_D = I_D_PT,
                       R_U = R_U_PT,
@@ -241,7 +285,7 @@ BaySIR_MCMC = function(confirmed_cases_cum, N,
 
   for (i in 2:niter) {
     
-    output_C = BaySIR_MCMC_cpp(S = S_PT, 
+    output_C = .Call("BaySIR_MCMC_cpp", S = S_PT, 
                         I_U = I_U_PT,
                         I_D = I_D_PT,
                         R_U = R_U_PT,
