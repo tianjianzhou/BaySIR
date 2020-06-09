@@ -10,3 +10,10 @@ library(devtools)
 install_github("tianjianzhou/BaySIR")
 ```
 
+
+## Usage
+
+```
+library(BaySIR)
+BaySIR_MCMC(B, I_D_0, N)
+```
