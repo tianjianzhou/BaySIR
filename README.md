@@ -17,4 +17,6 @@ install_github("tianjianzhou/BaySIR")
 library(BaySIR)
 MCMC_spls = BaySIR_MCMC(B, I_D_0, N)
 ```
-Here, `B` is a length `T + 1` vector of daily new confirmed cases `B[0], ..., B[T]`. `I_D_0` is the total number of confirmed cases on day 0. `N` is the population size.
+- `B` is a length `T + 1` vector of daily new confirmed cases `B[0], ..., B[T]`
+- `I_D_0` is the total number of confirmed cases on day 0
+- `N` is the population size.
