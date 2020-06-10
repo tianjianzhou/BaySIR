@@ -25,10 +25,10 @@ install_github("tianjianzhou/BaySIR")
     - `confirmed_cases_cum`: an optional length `T + 2` vector of cumulative confirmed case counts. If `B` and `I_D_0` have already been specified, then `confirmed_cases_cum` will be ignored. If not both `B` and `I_D_0` are specified and `confirmed_cases_cum` is supplied, then `confirmed_cases_cum` will be used to calculate `B` and `I_D_0`.
     - `X`: a `(T + 1) * Q` matrix, covariates related to the disease transmission rate. Default is an intercept term plus a time trend, `X[t, ] = (1, t)`.
     - `Y`: a `(T + 1) * K` matrix, covariates related to the diagnosis rate. Default contains only an intercept term, `Y[t, ] = 1`.
-    - `niter`
-    - `burnin`
-    - `thin`
-    - `Delta`
+    - `niter`: number of MCMC samples to return. Default is `1000`. The total number of MCMC iterations to be run is `niter * thin + burnin`.
+    - `burnin`: number of MCMC iterations that will be discarded as initial burn-in. Default is `10000`.
+    - `thin`: meaning keep 1 draw every `thin` MCMC iterations. Default is `20`.
+    - `Delta`: a monotonically increasing vector (each element is larger than the previous) defining the temperatures of the parallel Markov chains (parallel tempering). The first element must be 1, corresponding to the original posterior. Default is `1.5^(0:9)`.
 
 - Output
   - A list of posterior samples
