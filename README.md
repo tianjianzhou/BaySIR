@@ -15,9 +15,8 @@ install_github("tianjianzhou/BaySIR")
 
 ### BaySIR_MCMC
 - Usage
-```
-BaySIR_MCMC(B, I_D_0, N, ...)
-```
+  - `BaySIR_MCMC(B, I_D_0, N, ...)`
+
 - Arguments
   - Required
     - `B`: a length `T + 1` vector of daily new confirmed cases `B[0], ..., B[T]`
@@ -27,5 +26,5 @@ BaySIR_MCMC(B, I_D_0, N, ...)
     - `X`: a `(T + 1) * Q` matrix, covariates related to the disease transmission rate. Default is an intercept term plus a time trend
     - `Y`: a `(T + 1) * K` matrix, covariates related to the diagnosis rate. Default contains only an intercept term
 
-##### Outputs
-- A list of posterior samples
+- Output
+  - A list of posterior samples
