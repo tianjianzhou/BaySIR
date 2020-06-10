@@ -14,8 +14,7 @@ install_github("tianjianzhou/BaySIR")
 ## Functions
 
 ### BaySIR_MCMC
-- Usage
-  - `BaySIR_MCMC(B, I_D_0, N, ...)`
+- Usage: `BaySIR_MCMC(B, I_D_0, N, ...)`
 
 - Arguments
   - Required
