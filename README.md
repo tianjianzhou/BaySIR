@@ -13,6 +13,7 @@ install_github("tianjianzhou/BaySIR")
 
 ## Usage
 
+#### BaySIR_MCMC
 ```
 library(BaySIR)
 MCMC_spls = BaySIR_MCMC(B, I_D_0, N)
