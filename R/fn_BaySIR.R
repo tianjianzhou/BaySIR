@@ -359,7 +359,10 @@ BaySIR_MCMC = function(B, I_D_0, N,
   }
 
   print(sprintf("BaySIR: MCMC finished. Date: %s.", date()))
+  
+  R_eff_spls = sweep(beta_spls * S_spls / N, 2, alpha_spls, "/")
 
+  ## Posterior samples
   MCMC_spls = list()
 
   MCMC_spls$S_spls = S_spls
@@ -379,7 +382,36 @@ BaySIR_MCMC = function(B, I_D_0, N,
   
   MCMC_spls$alpha_spls = alpha_spls
 
-  return(MCMC_spls)
+  MCMC_spls$R_eff_spls = R_eff_spls
+
+  ## Posterior summaries
+  MCMC_summary = list()
+
+  MCMC_summary$S = t(apply(S_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
+  MCMC_summary$I_U = t(apply(I_U_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
+  MCMC_summary$I_D = t(apply(I_D_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
+  MCMC_summary$R_U = t(apply(R_U_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
+  MCMC_summary$R_D = t(apply(R_D_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
+  
+  MCMC_summary$mu = t(apply(mu_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
+  MCMC_summary$beta = t(apply(beta_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
+  MCMC_summary$sigma_beta = quantile(sigma_beta_spls, probs = c(0.5, 0.025, 0.975))
+  MCMC_summary$rho = quantile(rho_spls, probs = c(0.5, 0.025, 0.975))
+
+  MCMC_summary$eta = t(apply(eta_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
+  MCMC_summary$gamma = t(apply(gamma_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
+  MCMC_summary$sigma_lambda = quantile(sigma_lambda_spls, probs = c(0.5, 0.025, 0.975))
+  
+  MCMC_summary$alpha = quantile(alpha_spls, probs = c(0.5, 0.025, 0.975))
+
+  MCMC_summary$R_eff = t(apply(R_eff_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
+  
+
+  result_list = list()
+  result_list$MCMC_spls = MCMC_spls
+  result_list$MCMC_summary = MCMC_summary
+
+  return(result_list)
 
 }
 
