@@ -38,15 +38,21 @@ install_github("tianjianzhou/BaySIR")
     - `MCMC_summary`: a list of the posterior summaries for the parameters. For each parameter, its posterior median, 2.5% quantile and 97.5% quantile are reported.
 
 
-- Examples
+- Example 1: Simulated Data
   ```
   library(BaySIR)
   
+  # read data
   data(data_sim_1)
   B = data_sim_1$B
   I_D_0 = data_sim_1$I_D[1]
   N = data_sim_1$N
   
+  # run MCMC
   result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N)
+  
+  # posterior summary for the effective reproduction number
   result_list$MCMC_summary$R_eff
   ```
+  
+  - Example 2: Real Data (Illinois)
