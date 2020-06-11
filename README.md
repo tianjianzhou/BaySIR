@@ -34,3 +34,17 @@ install_github("tianjianzhou/BaySIR")
   - A list of the following:
     - `MCMC_spls`: a list of the MCMC samples for the parameters.
     - `MCMC_summary`: a list of the posterior summaries for the parameters. For each parameter, its posterior median, 2.5% quantile and 97.5% quantile are reported.
+
+
+- Examples
+```
+library(BaySIR)
+
+data(data_sim_1)
+B = data_sim_1$B
+I_D_0 = data_sim_1$I_D[1]
+N = data_sim_1$N
+
+result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N)
+result_list$MCMC_summary$R_eff
+```
