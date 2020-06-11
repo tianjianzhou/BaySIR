@@ -55,4 +55,21 @@ install_github("tianjianzhou/BaySIR")
   result_list$MCMC_summary$R_eff
   ```
   
-  - Example 2: Real Data (Illinois)
+- Example 2: Real Data (Illinois, data from JHU CSSE, https://github.com/CSSEGISandData/COVID-19)
+  ```
+  library(BaySIR)
+  
+  # read data
+  data = read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv", header = TRUE)
+  
+  confirmed_cases_cum = colSums(as.matrix(data[data$Province_State == "Illinois", -(1:11)]))
+  confirmed_cases_cum = unname(confirmed_cases_cum[confirmed_cases_cum > 100])
+  
+  N = 12671821
+  
+  # run MCMC
+  result_list = BaySIR_MCMC(confirmed_cases_cum = confirmed_cases_cum, N = N)
+  
+  # posterior summary for the effective reproduction number
+  result_list$MCMC_summary$R_eff
+  ```
