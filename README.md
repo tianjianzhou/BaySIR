@@ -37,14 +37,14 @@ install_github("tianjianzhou/BaySIR")
 
 
 - Examples
-```
-library(BaySIR)
-
-data(data_sim_1)
-B = data_sim_1$B
-I_D_0 = data_sim_1$I_D[1]
-N = data_sim_1$N
-
-result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N)
-result_list$MCMC_summary$R_eff
-```
+  ```
+  library(BaySIR)
+  
+  data(data_sim_1)
+  B = data_sim_1$B
+  I_D_0 = data_sim_1$I_D[1]
+  N = data_sim_1$N
+  
+  result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N)
+  result_list$MCMC_summary$R_eff
+  ```
