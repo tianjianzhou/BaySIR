@@ -13,7 +13,7 @@ install_github("tianjianzhou/BaySIR")
 
 ## Functions
 
-### BaySIR_MCMC
+### 1. BaySIR_MCMC
 - Usage: `BaySIR_MCMC(B, I_D_0, N, ...)`
 
 - Arguments
@@ -31,4 +31,6 @@ install_github("tianjianzhou/BaySIR")
     - `Delta`: a monotonically increasing vector (each element is larger than the previous) defining the temperatures of the parallel Markov chains (parallel tempering). The first element must be 1, corresponding to the original posterior. Default is `1.5^(0:9)`.
 
 - Output
-  - A list of posterior samples
+  - A list of the following:
+    - `MCMC_spls`: a list of the MCMC samples for the parameters.
+    - `MCMC_summary`: a list of the posterior summaries for the parameters. For each parameter, its posterior median, 2.5% quantile and 97.5% quantile are reported.
