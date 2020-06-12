@@ -73,3 +73,5 @@ install_github("tianjianzhou/BaySIR")
   # posterior summary for the effective reproduction number
   result_list$MCMC_summary$R_eff
   ```
+
+### 2. BaySIR_predict
