@@ -92,8 +92,8 @@ predict_list$pred_summary$R_eff
     - `N`: the population size.
   - Optional
     - `confirmed_cases_cum`: an optional length `T + 2` vector of cumulative confirmed case counts. If `B` and `I_D_0` have already been specified, then `confirmed_cases_cum` will be ignored. If not both `B` and `I_D_0` are specified and `confirmed_cases_cum` is supplied, then `confirmed_cases_cum` will be used to calculate `B` and `I_D_0`.
-    - `X`: a `(T + 1) * Q` matrix, covariates related to the disease transmission rate. Default is an intercept term plus a time trend, `X[t, ] = (1, t)`.
-    - `Y`: a `(T + 1) * K` matrix, covariates related to the diagnosis rate. Default contains only an intercept term, `Y[t, ] = 1`.
+    - `X`: a `(T + 1) * Q` matrix, covariates related to the disease transmission rate. Default is an intercept term plus a time trend, `X[t, ] = (1, t)`. It is possible to include other covariates. For example, `X[t, ] = (1, t, 1(stay-at-home order on day t), t * 1(stay-at-home order on day t))` and thus `Q = 4`.
+    - `Y`: a `(T + 1) * K` matrix, covariates related to the diagnosis rate. Default contains only an intercept term, `Y[t, ] = 1`. It is possible to include other covariates. For example, `Y[t, ] = (log number of test on day t)` or `Y[t, ] = (1, t)`.
     - `niter`: number of MCMC samples to return. Default is `1000`. The total number of MCMC iterations to be run is `niter * thin + burnin`.
     - `burnin`: number of MCMC iterations that will be discarded as initial burn-in. Default is `10000`.
     - `thin`: meaning keep 1 draw every `thin` MCMC iterations. Default is `20`.
