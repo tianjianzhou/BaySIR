@@ -64,8 +64,20 @@ N = 12671821
 # run MCMC
 result_list = BaySIR_MCMC(confirmed_cases_cum = confirmed_cases_cum, N = N)
 
+# for testing purpose, use smaller number of MCMC burn-in/iterations
+# result_list = BaySIR_MCMC(confirmed_cases_cum = confirmed_cases_cum, N = N, burnin = 1000, thin = 2, niter = 500)
+
 # posterior summary for the effective reproduction number
 result_list$MCMC_summary$R_eff
+
+# sample from posterior predictive distribution (for future 30 days)
+predict_list = BaySIR_predict(T_pred = 30, MCMC_spls = result_list$MCMC_spls, confirmed_cases_cum = confirmed_cases_cum, N = N)
+
+# posterior median of future B's
+predict_list$pred_summary$B[ , 1]
+
+# posterior summary for the future effective reproduction numbers
+predict_list$pred_summary$R_eff
 ```
 
 ## Documentation
