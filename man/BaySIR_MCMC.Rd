@@ -21,22 +21,40 @@ BaySIR_MCMC(
 \arguments{
 \item{B}{A length \code{T + 1} vector of daily new confirmed cases 
 \code{B[0], ..., B[T]}. \code{B[t]} represents the increment in
-confirmed cases between day \code{t} and day \code{t+1}.}
+confirmed cases between day \code{t} and day \code{t + 1}.}
 
 \item{I_D_0}{The total number of confirmed cases on day 0.}
 
 \item{N}{The population size.}
 
-\item{confirmed_cases_cum}{An optional length \code{T + 2} vector of cumulative 
+\item{confirmed_cases_cum}{Optional. A length \code{T + 2} vector of cumulative 
 confirmed case counts. If \code{B} and \code{I_D_0} have already been 
 specified, then \code{confirmed_cases_cum} will be ignored. If not both 
 \code{B} and \code{I_D_0} are specified and \code{confirmed_cases_cum}
 is supplied, then \code{confirmed_cases_cum}
 will be used to calculate \code{B} and \code{I_D_0}.}
 
-\item{X}{A \code{(T + 1) * Q} matrix, covariates related to the disease 
+\item{X}{Optional. A \code{(T + 1) * Q} matrix, covariates related to the disease 
 transmission rate. Default is an intercept term plus a time trend, 
 \code{X[t, ] = (1, t)}.}
+
+\item{Y}{Optional. A \code{(T + 1) * Q} matrix, covariates related to the diagnosis 
+rate. Default is only an intercept term, \code{Y[t, ] = 1}.}
+
+\item{niter}{Optional. The number of MCMC samples to return. Default is \code{1000}. 
+The total number of MCMC iterations to be run is 
+\code{niter * thin + burnin}.}
+
+\item{burnin}{Optional. The number of MCMC iterations that will be discarded as 
+initial burn-in. Default is \code{10000}.}
+
+\item{thin}{Optional, meaning keep 1 draw every \code{thin} MCMC iterations. 
+Default is \code{20}.}
+
+\item{Delta}{Optional. A monotonically increasing vector (each element is larger 
+than the previous) defining the temperatures of the parallel Markov 
+chains (parallel tempering). The first element must be \code{1},  
+corresponding to the original posterior. Default is \code{1.5^(0:9)}.}
 }
 \value{
 A list of the following:
@@ -44,12 +62,26 @@ A list of the following:
 \item{\code{MCMC_spls}}{Again, a list of MCMC samples for the parameters.
 \itemize{
   \item \code{R_eff_spls} A \code{(T + 1) * niter} matrix, MCMC samples of the 
-                      effective reproduction number. The l-th column,
-                      \code{R_eff_spls[ , l]}, represent the posterior samples of 
+                      effective reproduction number. The \code{l}-th column,
+                      \code{R_eff_spls[ , l]}, represents the posterior samples of 
                       the effective reproduction numbers for \code{T + 1} days at
-                      the l-th MCMC iteration.
+                      the \code{l}-th MCMC iteration.
+  \item \code{THETA_spls} MCMC samples of a specific parameter \code{THETA}. 
+                      Here, \code{THETA} can be \code{S}, \code{mu}, \code{eta},
+                      \code{alpha}, etc.
 }}
-\item{\code{MCMC_summary}}{Posterior summaries for the parameters.}
+\item{\code{MCMC_summary}}{Posterior summaries for the parameters.
+\itemize{
+  \item \code{R_eff} A \code{(T + 1) * 3} matrix, posterior summaries of the 
+                     effective reproduction number. Columns 1, 2 and 3 correspond to
+                     the posterior medians, 2.5% quantiles and 97.5% quantiles of 
+                     the effective reproduction numbers for \code{T + 1} days.
+                     For example, to access the posterior medians of R_eff, use
+                     \code{R_eff_spls[ , 1]}.
+  \item \code{THETA} Posterior summaries of a specific parameter \code{THETA}. 
+                     Here, \code{THETA} can be \code{S}, \code{mu}, \code{eta},
+                     \code{alpha}, etc.
+}}
 }
 }
 \description{
@@ -57,5 +89,22 @@ Implementing the parallel-tempering Markov chain Monte Carlo
 (PTMCMC) sampling from the posterior distribution of the parameters.
 }
 \examples{
+library(BaySIR)
+  
+# read data
+data(data_sim_1)
+B = data_sim_1$B
+I_D_0 = data_sim_1$I_D[1]
+N = data_sim_1$N
 
+# run MCMC (may take a few minutes, depending on computer. ~ 2 mins on Macbook Pro)
+result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N)
+
+# for testing purpose, use smaller number of MCMC burn-in/iterations
+# result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N, burnin = 1000, thin = 2, niter = 500)
+
+# retrieve posterior summaries for the effective reproduction number
+result_list$MCMC_summary$R_eff
+
+# End(Not run)
 }
