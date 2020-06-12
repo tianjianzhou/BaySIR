@@ -540,7 +540,7 @@ BaySIR_predict = function(T_pred = 10, MCMC_spls,
                                  beta = beta, mu = mu, 
                                  sigma_beta = sigma_beta, rho = rho, 
                                  X = X, X_pred = X_pred, 
-                                 T = T, T_pred = T_pred, PACKAGE = "BaySIR")
+                                 T = T, T_pred = T_pred, Q = Q)
 
     alpha = alpha_spls[i]
 
