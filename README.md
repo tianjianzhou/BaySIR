@@ -27,8 +27,11 @@ B = data_sim_1$B
 I_D_0 = data_sim_1$I_D[1]
 N = data_sim_1$N
 
-# run MCMC
+# run MCMC (may take a few minutes, depending on computer. ~ 2 mins on Macbook Pro)
 result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N)
+
+# for testing purpose, use smaller number of MCMC burn-in/iterations
+# result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N, burnin = 1000, thin = 2, niter = 500)
 
 # posterior summary for the effective reproduction number
 result_list$MCMC_summary$R_eff
