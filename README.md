@@ -14,8 +14,47 @@ library(devtools)
 install_github("tianjianzhou/BaySIR")
 ```
 
+## Examples
 
-## Functions
+### Example 1: Simulated Data
+```
+library(BaySIR)
+  
+# read data
+data(data_sim_1)
+B = data_sim_1$B
+I_D_0 = data_sim_1$I_D[1]
+N = data_sim_1$N
+
+# run MCMC
+result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N)
+
+# posterior summary for the effective reproduction number
+result_list$MCMC_summary$R_eff
+```
+
+### Example 2: Real Data (Illinois) 
+Data from JHU CSSE, https://github.com/CSSEGISandData/COVID-19
+```
+library(BaySIR)
+
+# read data
+data = read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv", header = TRUE)
+
+confirmed_cases_cum = colSums(as.matrix(data[data$Province_State == "Illinois", -(1:11)]))
+confirmed_cases_cum = unname(confirmed_cases_cum[confirmed_cases_cum > 100])
+
+# population in IL
+N = 12671821
+
+# run MCMC
+result_list = BaySIR_MCMC(confirmed_cases_cum = confirmed_cases_cum, N = N)
+
+# posterior summary for the effective reproduction number
+result_list$MCMC_summary$R_eff
+```
+
+## Documentation
 
 ### 1. BaySIR_MCMC
 - Usage: `BaySIR_MCMC(B, I_D_0, N, ...)`
@@ -40,42 +79,6 @@ install_github("tianjianzhou/BaySIR")
     - `MCMC_summary`: a list of the posterior summaries for the parameters. For each parameter, its posterior median, 2.5% quantile and 97.5% quantile are reported.
 
 
-- Example 1: Simulated Data
-  ```
-  library(BaySIR)
-  
-  # read data
-  data(data_sim_1)
-  B = data_sim_1$B
-  I_D_0 = data_sim_1$I_D[1]
-  N = data_sim_1$N
-  
-  # run MCMC
-  result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N)
-  
-  # posterior summary for the effective reproduction number
-  result_list$MCMC_summary$R_eff
-  ```
-  
-- Example 2: Real Data (Illinois, data from JHU CSSE, https://github.com/CSSEGISandData/COVID-19)
-  ```
-  library(BaySIR)
-  
-  # read data
-  data = read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv", header = TRUE)
-  
-  confirmed_cases_cum = colSums(as.matrix(data[data$Province_State == "Illinois", -(1:11)]))
-  confirmed_cases_cum = unname(confirmed_cases_cum[confirmed_cases_cum > 100])
-  
-  N = 12671821
-  
-  # run MCMC
-  result_list = BaySIR_MCMC(confirmed_cases_cum = confirmed_cases_cum, N = N)
-  
-  # posterior summary for the effective reproduction number
-  result_list$MCMC_summary$R_eff
-  ```
-
 ### 2. BaySIR_predict
 - Usage: `BaySIR_predict(T_pred = 10, MCMC_spls, B, I_D_0, N, ...)`
 
@@ -89,6 +92,6 @@ install_github("tianjianzhou/BaySIR")
     - `T_pred`: the number of future days that you would like to predict. Will predict `B[T + 1], ..., B[T + T_pred]`. Default is 10 days.
     - `confirmed_cases_cum`: an optional length `T + 2` vector of cumulative confirmed case counts. If `B` and `I_D_0` have already been specified, then `confirmed_cases_cum` will be ignored. If not both `B` and `I_D_0` are specified and `confirmed_cases_cum` is supplied, then `confirmed_cases_cum` will be used to calculate `B` and `I_D_0`.
     - `X_pred`: a `T_pred * Q` matrix, covariates related to the disease transmission rate for future days `T + 1, ..., T + T_pred`. Default is an intercept term plus a time trend, `X_pred[t, ] = (1, T + t)`. Note that if policy indicator is used as a covariate, we may not know what the policy will look like in the future and have to impute its future value. 
-    - `Y_pred`: a `T_pred * K` matrix, covariates related to the diagnosis rate for future days `T + 1, ..., T + T_pred`. Default contains only an intercept term, `Y[t, ] = 1`. Note that if number of tests is used as a covariate, we do not know what the number of tests will be in the future and have to impute its future value. 
+    - `Y_pred`: a `T_pred * K` matrix, covariates related to the diagnosis rate for future days `T + 1, ..., T + T_pred`. Default contains only an intercept term, `Y_pred[t, ] = 1`. Note that if number of tests is used as a covariate, we do not know what the number of tests will be in the future and have to impute its future value. 
     - `X`: a `(T + 1) * Q` matrix, covariates related to the disease transmission rate. Default is an intercept term plus a time trend, `X[t, ] = (1, t)`.
     - `Y`: a `(T + 1) * K` matrix, covariates related to the diagnosis rate. Default contains only an intercept term, `Y[t, ] = 1`.
