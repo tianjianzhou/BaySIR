@@ -1,11 +1,4 @@
 
-
-# library(Rcpp)
-# library(RcppArmadillo)
-# sourceCpp("fn_BaySIR_MCMC.cpp")
-
-
-
 BaySIR_MCMC = function(B, I_D_0, N, 
   confirmed_cases_cum = NULL,
   X = NULL, Y = NULL, 
