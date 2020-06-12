@@ -833,33 +833,50 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
 
 
 
-
 // [[Rcpp::export]]
-vec BaySIR_predict_GP (vec &beta, vec &mu, double sigma_beta, double rho,
-  mat &X, mat &X_pred, int T, int T_pred) {
+RcppExport SEXP BaySIR_predict_GP (SEXP beta, SEXP mu, SEXP sigma_beta, SEXP rho,
+  SEXP X, SEXP X_pred, SEXP T, SEXP T_pred, SEXP Q) {
   
+  // All variables
+  NumericVector beta_(beta);
+  NumericVector mu_(mu);
+  double sigma_beta_ = as <double> (sigma_beta);
+  double rho_ = as <double> (rho);
+  NumericMatrix X_(X);
+  NumericMatrix X_pred_(X_pred);
+  int T_ = as <int> (T);
+  int T_pred_ = as <int> (T_pred);
+  int Q_ = as <int> (Q);
 
-  mat Sigma_beta(T + T_pred + 1, T + T_pred + 1);
+  // initialize arma vecs
+  // variables
+  vec beta_arma(beta_.begin(), T_ + 1, false);
+  vec mu_arma(mu_.begin(), Q_, false);
+  mat X_arma(X_.begin(), T_ + 1, Q_, false);
+  mat X_pred_arma(X_pred_.begin(), T_pred_, Q_, false);
+  
+  mat Sigma_beta(T_ + T_pred_ + 1, T_ + T_pred_ + 1);
   Sigma_beta.fill(0.0);
   
+
   int i, j;
 
-  for (i = 0; i < T + T_pred + 1; i++) {
-    for (j = 0; j < T + T_pred + 1; j++) {
-      Sigma_beta(i, j) = pow(rho, (double) abs(i - j));
+  for (i = 0; i < T_ + T_pred_ + 1; i++) {
+    for (j = 0; j < T_ + T_pred_ + 1; j++) {
+      Sigma_beta(i, j) = pow(rho_, (double) abs(i - j));
     }
   }
   
-  Sigma_beta = pow(sigma_beta, 2) * Sigma_beta;
+  Sigma_beta = pow(sigma_beta_, 2) * Sigma_beta;
 
 
-  mat Sigma_beta_11 = Sigma_beta.submat(0, 0, T, T);
-  mat Sigma_beta_21 = Sigma_beta.submat(T + 1, 0, T + T_pred, T);
-  mat Sigma_beta_22 = Sigma_beta.submat(T + 1, T + 1, T + T_pred, T + T_pred);
+  mat Sigma_beta_11 = Sigma_beta.submat(0, 0, T_, T_);
+  mat Sigma_beta_21 = Sigma_beta.submat(T_ + 1, 0, T_ + T_pred_, T_);
+  mat Sigma_beta_22 = Sigma_beta.submat(T_ + 1, T_ + 1, T_ + T_pred_, T_ + T_pred_);
   mat inv_Sigma_beta_11 = inv(Sigma_beta_11);
   
-  vec beta_pred_mean = X_pred * mu + 
-            Sigma_beta_21 * inv_Sigma_beta_11 * (log(beta) - X * mu);
+  vec beta_pred_mean = X_pred_arma * mu_arma + 
+            Sigma_beta_21 * inv_Sigma_beta_11 * (log(beta_arma) - X_arma * mu_arma);
 
   mat beta_pred_cov = Sigma_beta_22 - Sigma_beta_21 * inv_Sigma_beta_11 * trans(Sigma_beta_21);
   
@@ -867,7 +884,7 @@ vec BaySIR_predict_GP (vec &beta, vec &mu, double sigma_beta, double rho,
 
   vec beta_pred = exp(mvrnorm(beta_pred_mean, beta_pred_cov));
 
-  return(beta_pred);
+  return(wrap(beta_pred));
 
 }
 
