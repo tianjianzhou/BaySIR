@@ -18,6 +18,7 @@ install_github("tianjianzhou/BaySIR")
 Please refer to [Documentation](https://github.com/tianjianzhou/BaySIR/blob/master/README.md#documentation) for details about the BaySIR functions.
 
 ### Example 1: Simulated Data
+
 ```
 library(BaySIR)
   
@@ -35,6 +36,15 @@ result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N)
 
 # posterior summary for the effective reproduction number
 result_list$MCMC_summary$R_eff
+
+# sample from posterior predictive distribution (for future 30 days)
+predict_list = BaySIR_predict(T_pred = 30, MCMC_spls = result_list$MCMC_spls, B = B, I_D_0 = I_D_0, N = N)
+
+# posterior median of future B's
+predict_list$pred_summary$B[ , 1]
+
+# posterior summary for the future effective reproduction numbers
+predict_list$pred_summary$R_eff
 ```
 
 ### Example 2: Real Data (Illinois) 
