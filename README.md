@@ -75,3 +75,11 @@ install_github("tianjianzhou/BaySIR")
   ```
 
 ### 2. BaySIR_predict
+- Usage: `BaySIR_predict(T_pred = 10, MCMC_spls, B, I_D_0, N, ...)`
+
+- Arguments
+  - Required
+    - `MCMC_spls`: a list of the MCMC samples for the parameters obtained from `BaySIR_MCMC(...)`.
+    - `B`: a length `T + 1` vector of daily new confirmed cases `B[0], ..., B[T]`.
+    - `I_D_0`: the total number of confirmed cases on day 0.
+    - `N`: the population size.
