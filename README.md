@@ -1,6 +1,8 @@
 # BaySIR
 Semiparametric Bayesian Inference for the Transmission Dynamics of COVID-19 with a State-Space Model
 
+There may be some bugs. Still updating. Please come back.
+
 Link to manuscript: http://arxiv.org/abs/2006.05581
 
 ## Installation
@@ -83,3 +85,5 @@ install_github("tianjianzhou/BaySIR")
     - `B`: a length `T + 1` vector of daily new confirmed cases `B[0], ..., B[T]`.
     - `I_D_0`: the total number of confirmed cases on day 0.
     - `N`: the population size.
+  - Optional
+    - `T_pred`: the number of future days that you would like to predict. Will predict `B[T + 1], ..., B[T + T_pred]`. Default is 10 days.
