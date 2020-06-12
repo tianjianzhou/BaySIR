@@ -15,6 +15,7 @@ install_github("tianjianzhou/BaySIR")
 ```
 
 ## Examples
+Please refer to [Documentation](https://github.com/tianjianzhou/BaySIR/blob/master/README.md#documentation) for details about the BaySIR functions.
 
 ### Example 1: Simulated Data
 ```
@@ -34,7 +35,7 @@ result_list$MCMC_summary$R_eff
 ```
 
 ### Example 2: Real Data (Illinois) 
-Data from JHU CSSE, https://github.com/CSSEGISandData/COVID-19
+Data from [JHU CSSE](https://github.com/CSSEGISandData/COVID-19)
 ```
 library(BaySIR)
 
