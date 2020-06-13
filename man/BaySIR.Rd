@@ -22,3 +22,7 @@ documentation for a specific function. E.g., \code{?BaySIR_MCMC}.
 Tianjian Zhou, \email{tjzhou95@gmail.com}
 }
 
+\seealso{
+\code{\link{BaySIR_MCMC}} for MCMC sampling, 
+  \code{\link{BaySIR_predict}} for posterior prediction.
+}
