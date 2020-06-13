@@ -1,3 +1,110 @@
+#' BaySIR
+#'
+#' @description
+#' The BaySIR package includes two major functions, which can be used for 
+#' estimating the time-varying effective reproduction number of COVID-19 in a
+#' specific country/region, and predicting future case counts. 
+#' Data of daily confirmed cases are needed. 
+#' The two functions are:
+#' \describe{
+#' \item{\code{BaySIR_MCMC}}{}
+#' \item{\code{BaySIR_predict}}{}
+#' }
+#' Use \code{?Function_Name} or \code{help(Function_Name)} to retrieve the 
+#' documentation for a specific function. E.g., \code{?BaySIR_MCMC}.
+#'
+#' @docType package
+#' @name BaySIR
+#' @section Author:
+#' Tianjian Zhou, \email{tjzhou95@gmail.com}
+#' @seealso \code{\link{BaySIR_MCMC}} for MCMC sampling, 
+#'   \code{\link{BaySIR_predict}} for posterior prediction.
+NULL
+
+
+
+###########################################################################
+## 1. BaySIR: Function for MCMC sampling
+###########################################################################
+#' BaySIR MCMC sampling 
+#' 
+#' @description
+#' Implementing the parallel-tempering Markov chain Monte Carlo 
+#' (PTMCMC) sampling from the posterior distribution of the parameters.
+#'
+#' @param B A length \code{T + 1} vector of daily new confirmed cases 
+#'          \code{B[0], ..., B[T]}. \code{B[t]} represents the increment in
+#'          confirmed cases between day \code{t} and day \code{t + 1}.
+#' @param I_D_0 The total number of confirmed cases on day 0.
+#' @param N The population size.
+#' @param confirmed_cases_cum Optional. A length \code{T + 2} vector of cumulative 
+#'          confirmed case counts. If \code{B} and \code{I_D_0} have already been 
+#'          specified, then \code{confirmed_cases_cum} will be ignored. If not both 
+#'          \code{B} and \code{I_D_0} are specified and \code{confirmed_cases_cum}
+#'          is supplied, then \code{confirmed_cases_cum}
+#'          will be used to calculate \code{B} and \code{I_D_0}.
+#' @param X Optional. A \code{(T + 1) * Q} matrix, covariates related to the disease 
+#'          transmission rate. Default is an intercept term plus a time trend, 
+#'          \code{X[t, ] = (1, t)}.
+#' @param Y Optional. A \code{(T + 1) * K} matrix, covariates related to the diagnosis 
+#'          rate. Default is only an intercept term, \code{Y[t, ] = 1}.
+#' @param niter Optional. The number of MCMC samples to return. Default is \code{1000}. 
+#'              The total number of MCMC iterations to be run is 
+#'              \code{niter * thin + burnin}.
+#' @param burnin Optional. The number of MCMC iterations that will be discarded as 
+#'               initial burn-in. Default is \code{10000}.
+#' @param thin Optional, meaning keep 1 draw every \code{thin} MCMC iterations. 
+#'             Default is \code{20}.
+#' @param Delta Optional. A monotonically increasing vector (each element is larger 
+#'              than the previous) defining the temperatures of the parallel Markov 
+#'              chains (parallel tempering). The first element must be \code{1},  
+#'              corresponding to the original posterior. Default is \code{1.5^(0:9)}.
+#'
+#' @return A list of the following:
+#' \describe{
+#' \item{\code{MCMC_spls}}{Again, a list of MCMC samples for the parameters.
+#' \itemize{
+#'   \item \code{R_eff_spls} A \code{(T + 1) * niter} matrix, MCMC samples of the 
+#'                       effective reproduction number. The \code{l}-th column,
+#'                       \code{R_eff_spls[ , l]}, represents the posterior samples of 
+#'                       the effective reproduction numbers for \code{T + 1} days at
+#'                       the \code{l}-th MCMC iteration.
+#'   \item \code{THETA_spls} MCMC samples of a specific parameter \code{THETA}. 
+#'                       Here, \code{THETA} can be \code{S}, \code{mu}, \code{eta},
+#'                       \code{alpha}, etc.
+#' }}
+#' \item{\code{MCMC_summary}}{Posterior summaries for the parameters.
+#' \itemize{
+#'   \item \code{R_eff} A \code{(T + 1) * 3} matrix, posterior summaries of the 
+#'                      effective reproduction number. Columns 1, 2 and 3 correspond to
+#'                      the posterior medians, 2.5% quantiles and 97.5% quantiles of 
+#'                      the effective reproduction numbers for \code{T + 1} days.
+#'                      For example, to access the posterior medians of R_eff, use
+#'                      \code{MCMC_summary$R_eff[ , 1]}.
+#'   \item \code{THETA} Posterior summaries of a specific parameter \code{THETA}. 
+#'                      Here, \code{THETA} can be \code{S}, \code{mu}, \code{eta},
+#'                      \code{alpha}, etc.
+#' }}
+#' }
+#' @examples
+#' library(BaySIR)
+#'   
+#' # read data
+#' data(data_sim_1)
+#' B = data_sim_1$B
+#' I_D_0 = data_sim_1$I_D[1]
+#' N = data_sim_1$N
+#' 
+#' # run MCMC (may take a few minutes, depending on computer. ~ 2 mins on Macbook Pro)
+#' result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N)
+#' 
+#' # for testing purpose, use smaller number of MCMC burn-in/iterations
+#' # result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N, burnin = 1000, thin = 2, niter = 500)
+#' 
+#' # retrieve posterior summaries for the effective reproduction number
+#' result_list$MCMC_summary$R_eff
+#'
+#' # End(Not run)
 
 BaySIR_MCMC = function(B, I_D_0, N, 
   confirmed_cases_cum = NULL,
@@ -418,8 +525,112 @@ BaySIR_MCMC = function(B, I_D_0, N,
 
 
 
-
-
+###########################################################################
+## 2. BaySIR: Function for posterior prediction
+###########################################################################
+#' BaySIR posterior prediction 
+#' 
+#' @description
+#' Sampling from the posterior predictive distribution of future observations,
+#' in particular, future case counts.
+#'
+#' @param T_pred The number of future days that you would like to predict. 
+#'               Will predict B[T + 1], ..., B[T + T_pred]. Default is 10 days.
+#' @param MCMC_spls A list of the MCMC samples for the parameters obtained 
+#'                  from \code{\link{BaySIR_MCMC}}.
+#' @param B A length \code{T + 1} vector of daily new confirmed cases 
+#'          \code{B[0], ..., B[T]}. \code{B[t]} represents the increment in
+#'          confirmed cases between day \code{t} and day \code{t + 1}.
+#' @param I_D_0 The total number of confirmed cases on day 0.
+#' @param N The population size.
+#' @param confirmed_cases_cum Optional. A length \code{T + 2} vector of cumulative 
+#'          confirmed case counts. If \code{B} and \code{I_D_0} have already been 
+#'          specified, then \code{confirmed_cases_cum} will be ignored. If not both 
+#'          \code{B} and \code{I_D_0} are specified and \code{confirmed_cases_cum}
+#'          is supplied, then \code{confirmed_cases_cum}
+#'          will be used to calculate \code{B} and \code{I_D_0}.
+#' @param X_pred Optional. A \code{T_pred * Q} matrix, covariates related to the disease 
+#'               transmission rate for future days \code{T + 1, ..., T + T_pred}. 
+#'               Default is an intercept term plus a time trend, 
+#'               \code{X_pred[t, ] = (1, T + t)}.
+#' @param Y_pred Optional. A \code{T_pred * K} matrix, covariates related to the diagnosis 
+#'               ratefor future days \code{T + 1, ..., T + T_pred}. Default 
+#'               contains only an intercept term, \code{Y_pred[t, ] = 1}.
+#' @param X Optional. A \code{(T + 1) * Q} matrix, covariates related to the disease 
+#'          transmission rate. Default is an intercept term plus a time trend, 
+#'          \code{X[t, ] = (1, t)}.
+#' @param Y Optional. A \code{(T + 1) * K} matrix, covariates related to the diagnosis 
+#'          rate. Default is only an intercept term, \code{Y[t, ] = 1}.
+#'
+#' @return A list of the following:
+#' \describe{
+#' \item{\code{pred_spls}}{Again, a list of samples for the parameters from their 
+#'                         posterior predictive distributions.
+#' \itemize{
+#'   \item \code{B_pred_spls} A \code{T_pred * niter} matrix, samples of the 
+#'                       B (case counts) for future days 
+#'                       \code{T + 1, ..., T + T_pred} from its posterior predictive
+#'                       distribution. Each column corresponds to a sample, and each
+#'                       row corresponds to a day.
+#'   \item \code{R_eff_pred_spls} A \code{T_pred * niter} matrix, samples of the 
+#'                       effective reproduction number for future days 
+#'                       \code{T + 1, ..., T + T_pred} from its posterior predictive
+#'                       distribution. Each column corresponds to a sample, and each
+#'                       row corresponds to a day.
+#'   \item \code{THETA_pred_spls} Samples of a specific time-dependent parameter 
+#'                       \code{THETA} from its posterior predictive distribution
+#'                       for future days. 
+#'                       Here, \code{THETA} can be \code{S}, \code{I_U},
+#'                       \code{beta}, etc.
+#' }}
+#' \item{\code{pred_summary}}{Summaries for the posterior predictive distributions
+#'                            of the parameters.
+#' \itemize{
+#'   \item \code{B} A \code{T_pred * 3} matrix, summaries for the posterior 
+#'                  predictive distribution of B (case counts)
+#'                  for future days 
+#'                  \code{T + 1, ..., T + T_pred}. Columns 1, 2 and 3 correspond to
+#'                  the posterior medians, 2.5% quantiles and 97.5% quantiles.
+#'                  For example, to access the posterior median of B on day
+#'                  \code{T + j}, use
+#'                  \code{pred_summary$B[j, 1]}.
+#'   \item \code{R_eff} A \code{T_pred * 3} matrix, summaries for the posterior 
+#'                      predictive distribution of the 
+#'                      effective reproduction number for future days 
+#'                       \code{T + 1, ..., T + T_pred}. Columns 1, 2 and 3 correspond to
+#'                      the posterior medians, 2.5% quantiles and 97.5% quantiles.
+#'                      For example, to access the posterior median of R_eff on day
+#'                      \code{T + j}, use
+#'                      \code{pred_summary$R_eff[j, 1]}.
+#'   \item \code{THETA} Summaries of a specific time-dependent parameter 
+#'                      \code{THETA} from its posterior predictive distribution
+#'                      for future days. 
+#'                      Here, \code{THETA} can be \code{S}, \code{I_U},
+#'                      \code{beta}, etc.
+#' }}
+#' }
+#' @examples
+#' library(BaySIR)
+#'   
+#' # read data
+#' data(data_sim_1)
+#' B = data_sim_1$B
+#' I_D_0 = data_sim_1$I_D[1]
+#' N = data_sim_1$N
+#' 
+#' # run MCMC (may take a few minutes, depending on computer. ~ 2 mins on Macbook Pro)
+#' result_list = BaySIR_MCMC(B = B, I_D_0 = I_D_0, N = N)
+#' 
+#' # sample from posterior predictive distribution (for future 30 days)
+#' predict_list = BaySIR_predict(T_pred = 30, MCMC_spls = result_list$MCMC_spls, B = B, I_D_0 = I_D_0, N = N)
+#' 
+#' # posterior median of future B's
+#' predict_list$pred_summary$B[ , 1]
+#' 
+#' # posterior summary for the future effective reproduction numbers
+#' predict_list$pred_summary$R_eff
+#'
+#' # End(Not run)
 
 BaySIR_predict = function(T_pred = 10, MCMC_spls,
   B, I_D_0, N, 
@@ -503,6 +714,22 @@ BaySIR_predict = function(T_pred = 10, MCMC_spls,
   alpha_spls = MCMC_spls$alpha_spls
 
   niter = dim(S_spls)[2]
+
+  if (dim(mu_spls)[1] != dim(X)[2]) {
+    stop("Dimension of the posterior samples of mu does not match with X.")
+  }
+
+  if (dim(mu_spls)[1] != dim(X_pred)[2]) {
+    stop("Dimension of the posterior samples of mu does not match with X_pred.")
+  }
+  
+  if (dim(eta_spls)[1] != dim(Y)[2]) {
+    stop("Dimension of the posterior samples of eta does not match with Y.")
+  }
+
+  if (dim(eta_spls)[1] != dim(Y_pred)[2]) {
+    stop("Dimension of the posterior samples of eta does not match with Y_pred.")
+  }
   
   ############################################################
   ## Initialize posterior predictive samples
