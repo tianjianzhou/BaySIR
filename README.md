@@ -124,3 +124,8 @@ predict_list$pred_summary$R_eff
     - `Y_pred`: a `T_pred * K` matrix, covariates related to the diagnosis rate for future days `T + 1, ..., T + T_pred`. Default contains only an intercept term, `Y_pred[t, ] = 1`. Note that if number of tests is used as a covariate, we do not know what the number of tests will be in the future and have to impute its future value. 
     - `X`: a `(T + 1) * Q` matrix, covariates related to the disease transmission rate. Default is an intercept term plus a time trend, `X[t, ] = (1, t)`.
     - `Y`: a `(T + 1) * K` matrix, covariates related to the diagnosis rate. Default contains only an intercept term, `Y[t, ] = 1`.
+    
+- Output
+  - A list of the following:
+    - `pred_spls`: a list of the MC samples for the parameters from their posterior predictive distributions.
+    - `pred_summary`: a list of the summaries for the posterior predictive distributions of the parameters. For each parameter, its posterior (predictive) median, 2.5% quantile and 97.5% quantile are reported.
