@@ -1,11 +1,14 @@
 # BaySIR
 **Semiparametric Bayesian Inference for the Transmission Dynamics of COVID-19 with a State-Space Model**
 
-There may be some bugs. Still updating. Please come back.
+I am actively updating the package. Please visit again for the latest version!
 
 Link to manuscript: http://arxiv.org/abs/2006.05581
 
 ## Installation
+
+First of all, you need [R](https://www.r-project.org/). For Windows users, [Rtools](https://cran.r-project.org/bin/windows/Rtools/) is needed. For Mac users, [Xcode](https://apps.apple.com/us/app/xcode/id497799835) may be needed.
+
 The `BaySIR` package has two dependencies: `Rcpp` and `RcppArmadillo`.
 
 The `BaySIR` package can be easily installed with the `devtools` package in R. After `devtools` has been installed, run the following commands in R to install the `BaySIR` package.
