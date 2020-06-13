@@ -38,7 +38,7 @@ will be used to calculate \code{B} and \code{I_D_0}.}
 transmission rate. Default is an intercept term plus a time trend, 
 \code{X[t, ] = (1, t)}.}
 
-\item{Y}{Optional. A \code{(T + 1) * Q} matrix, covariates related to the diagnosis 
+\item{Y}{Optional. A \code{(T + 1) * K} matrix, covariates related to the diagnosis 
 rate. Default is only an intercept term, \code{Y[t, ] = 1}.}
 
 \item{niter}{Optional. The number of MCMC samples to return. Default is \code{1000}. 
@@ -77,7 +77,7 @@ A list of the following:
                      the posterior medians, 2.5% quantiles and 97.5% quantiles of 
                      the effective reproduction numbers for \code{T + 1} days.
                      For example, to access the posterior medians of R_eff, use
-                     \code{R_eff_spls[ , 1]}.
+                     \code{MCMC_summary$R_eff[ , 1]}.
   \item \code{THETA} Posterior summaries of a specific parameter \code{THETA}. 
                      Here, \code{THETA} can be \code{S}, \code{mu}, \code{eta},
                      \code{alpha}, etc.
