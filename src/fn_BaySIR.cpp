@@ -21,8 +21,8 @@ vec mvrnorm(vec &mu, mat &Sigma) {
 
 void update_I_U_0 (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D, 
   vec &B, double N,
-  vec &beta, mat &Y, vec &eta, 
-  vec &gamma, double sigma_lambda,
+  vec &beta, 
+  vec &gamma, mat &Y, vec &eta, double sigma_gamma,
   double kappa, double alpha, 
   int T, double nu_1, double nu_2,
   double Tmp){
@@ -35,7 +35,7 @@ void update_I_U_0 (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
   vec R_U_pro(T + 1);
   
   vec gamma_pro(T + 1); 
-  vec lambda_pro(T + 1);
+  vec gamma_tilde_pro(T + 1);
 
   vec Y_eta = Y * eta;
   
@@ -46,7 +46,7 @@ void update_I_U_0 (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
   R_U_pro(0) = 0;
 
   gamma_pro(0) = B(0) / ( (1.0 - alpha) * I_U_pro(0) );
-  lambda_pro(0) = log(-log(1 - gamma_pro(0)));
+  gamma_tilde_pro(0) = log(-log(1 - gamma_pro(0)));
 
   for (t = 0; t < T; t++) {
     
@@ -62,7 +62,7 @@ void update_I_U_0 (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
     R_U_pro(t + 1) = R_U_pro(t) + alpha * I_U_pro(t);
     
     gamma_pro(t + 1) = B(t + 1) / ( (1.0 - alpha) * I_U_pro(t + 1) );
-    lambda_pro(t + 1) = log(-log(1 - gamma_pro(t + 1)));
+    gamma_tilde_pro(t + 1) = log(-log(1 - gamma_pro(t + 1)));
     
   }
 
@@ -77,8 +77,8 @@ void update_I_U_0 (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
 
     for (t = 0; t <= T; t++) {
 
-      loglik_diff = loglik_diff - (0.5 / pow(sigma_lambda, 2)) * 
-        ( pow(lambda_pro(t) - Y_eta(t), 2) - 
+      loglik_diff = loglik_diff - (0.5 / pow(sigma_gamma, 2)) * 
+        ( pow(gamma_tilde_pro(t) - Y_eta(t), 2) - 
           pow(log(-log(1 - gamma(t))) - Y_eta(t), 2) );
     
     }
@@ -122,8 +122,8 @@ void update_I_U_0 (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
 
 void update_beta_t (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D, 
   vec &B, double N,
-  mat &X, vec &mu, vec &beta, double sigma_beta, double rho,
-  mat &Y, vec &eta, vec &gamma, double sigma_lambda,
+  vec &beta, mat &X, vec &mu, double sigma_beta, double rho,
+  vec &gamma, mat &Y, vec &eta, double sigma_gamma,
   double kappa, double alpha,
   int t, int T,
   double Tmp) {
@@ -153,7 +153,7 @@ void update_beta_t (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
   vec R_U_pro(T + 1);
 
   vec gamma_pro(T + 1); 
-  vec lambda_pro(T + 1);
+  vec gamma_tilde_pro(T + 1);
 
   vec Y_eta = Y * eta;
 
@@ -166,7 +166,7 @@ void update_beta_t (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
   R_U_pro(0) = R_U(0);
   
   gamma_pro(0) = B(0) / ( (1.0 - alpha) * I_U_pro(0) );
-  lambda_pro(0) = log(-log(1 - gamma_pro(0)));
+  gamma_tilde_pro(0) = log(-log(1 - gamma_pro(0)));
   
 
   for (tt = 0; tt < T; tt++) {
@@ -188,7 +188,7 @@ void update_beta_t (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
     R_U_pro(tt + 1) = R_U_pro(tt) + alpha * I_U_pro(tt);
     
     gamma_pro(tt + 1) = B(tt + 1) / ( (1.0 - alpha) * I_U_pro(tt + 1) );
-    lambda_pro(tt + 1) = log(-log(1 - gamma_pro(tt + 1)));
+    gamma_tilde_pro(tt + 1) = log(-log(1 - gamma_pro(tt + 1)));
 
   }
 
@@ -203,8 +203,8 @@ void update_beta_t (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
 
     for (tt = 0; tt <= T; tt++) {
 
-      loglik_diff = loglik_diff - (0.5 / pow(sigma_lambda, 2)) * 
-        ( pow(lambda_pro(tt) - Y_eta(tt), 2) - 
+      loglik_diff = loglik_diff - (0.5 / pow(sigma_gamma, 2)) * 
+        ( pow(gamma_tilde_pro(tt) - Y_eta(tt), 2) - 
           pow(log(-log(1 - gamma(tt))) - Y_eta(tt), 2) );
     
     }
@@ -240,7 +240,7 @@ void update_beta_t (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
 
 
 
-void update_mu_sigma_beta_rho (mat &X, vec &mu, vec &beta, double *sigma_beta, double *rho,
+void update_mu_sigma_beta_rho (vec &beta, mat &X, vec &mu, double *sigma_beta, double *rho,
   int Q, int T,
   vec &mu_tilde, vec &sigma_mu) {
 
@@ -375,8 +375,8 @@ void update_mu_sigma_beta_rho (mat &X, vec &mu, vec &beta, double *sigma_beta, d
 
 void update_alpha (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D, 
   vec &B, double N,
-  vec &beta, mat &Y, vec &eta, 
-  vec &gamma, double sigma_lambda,
+  vec &beta, 
+  vec &gamma, mat &Y, vec &eta, double sigma_gamma,
   double kappa, double *alpha, int T,
   double nu_alpha_1, double nu_alpha_2,
   double Tmp) {
@@ -391,7 +391,7 @@ void update_alpha (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
   vec R_D_pro(T + 1);
   
   vec gamma_pro(T + 1); 
-  vec lambda_pro(T + 1);
+  vec gamma_tilde_pro(T + 1);
 
   vec Y_eta = Y * eta;
 
@@ -415,7 +415,7 @@ void update_alpha (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
     R_D_pro(0) = R_D(0);
     
     gamma_pro(0) = B(0) / ( (1.0 - alpha_pro) * I_U_pro(0) );
-    lambda_pro(0) = log(-log(1 - gamma_pro(0)));
+    gamma_tilde_pro(0) = log(-log(1 - gamma_pro(0)));
     
     for (t = 0; t < T; t++) {
     
@@ -433,7 +433,7 @@ void update_alpha (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
       R_D_pro(t + 1) = R_D_pro(t) + alpha_pro * I_D_pro(t);
     
       gamma_pro(t + 1) = B(t + 1) / ( (1.0 - alpha_pro) * I_U_pro(t + 1) );
-      lambda_pro(t + 1) = log(-log(1 - gamma_pro(t + 1)));
+      gamma_tilde_pro(t + 1) = log(-log(1 - gamma_pro(t + 1)));
 
     }
 
@@ -450,8 +450,8 @@ void update_alpha (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
 
     for (t = 0; t <= T; t++) {
 
-      loglik_diff = loglik_diff - (0.5 / pow(sigma_lambda, 2)) * 
-        ( pow(lambda_pro(t) - Y_eta(t), 2) - 
+      loglik_diff = loglik_diff - (0.5 / pow(sigma_gamma, 2)) * 
+        ( pow(gamma_tilde_pro(t) - Y_eta(t), 2) - 
           pow(log(-log(1 - gamma(t))) - Y_eta(t), 2) );
     
     }
@@ -499,23 +499,21 @@ void update_alpha (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
 
 
 
-void update_eta (mat &Y, vec &eta, 
-  vec &gamma, double sigma_lambda,
-  int K,
+void update_eta (vec &gamma, mat &Y, vec &eta, double sigma_gamma, int K,
   vec &eta_tilde, double sigma_eta,
   double Tmp) {
 
-  vec lambda = log(-log(1 - gamma));
+  vec gamma_tilde = log(-log(1 - gamma));
 
   // vec eta_pro;
   mat eta_post_cov;
   vec eta_post_mean;
 
   eta_post_cov = inv(pow(1.0 / sigma_eta, 2) * eye(K, K) + 
-    pow(1.0 / sigma_lambda, 2) * trans(Y) * Y / Tmp);
+    pow(1.0 / sigma_gamma, 2) * trans(Y) * Y / Tmp);
 
   eta_post_mean = eta_post_cov * ( pow(1.0 / sigma_eta, 2) * eye(K, K) * eta_tilde + 
-    pow(1.0 / sigma_lambda, 2) * trans(Y) * lambda / Tmp );
+    pow(1.0 / sigma_gamma, 2) * trans(Y) * gamma_tilde / Tmp );
   
   // Rcout << eta_tilde << "\n";
   // Rcout << eta_post_mean << "\n";
@@ -534,24 +532,23 @@ void update_eta (mat &Y, vec &eta,
 
 
 
-void update_sigma_lambda (mat &Y, vec &eta, 
-  vec &gamma, double *sigma_lambda,
+void update_sigma_gamma (vec &gamma, mat &Y, vec &eta, double *sigma_gamma,
   int T, double Tmp) {
   
-  double sigma_lambda_post_shape, sigma_lambda_post_rate;
+  double sigma_gamma_post_shape, sigma_gamma_post_rate;
   int t;
 
   vec Y_eta = Y * eta;
   
-  sigma_lambda_post_shape = 11.0 + 0.5 * ((double) T + 1.0) / Tmp;
-  sigma_lambda_post_rate = 1.0;
+  sigma_gamma_post_shape = 11.0 + 0.5 * ((double) T + 1.0) / Tmp;
+  sigma_gamma_post_rate = 1.0;
 
   for (t = 0; t <= T; t++) {
-    sigma_lambda_post_rate = sigma_lambda_post_rate + 
+    sigma_gamma_post_rate = sigma_gamma_post_rate + 
       0.5 * pow(log(-log(1 - gamma(t))) - Y_eta(t), 2) / Tmp;
   }
   
-  *sigma_lambda = 1.0 / sqrt(R::rgamma(sigma_lambda_post_shape, 1.0 / sigma_lambda_post_rate));
+  *sigma_gamma = 1.0 / sqrt(R::rgamma(sigma_gamma_post_shape, 1.0 / sigma_gamma_post_rate));
 
   return;
 
@@ -563,15 +560,15 @@ void update_sigma_lambda (mat &Y, vec &eta,
 
 
 
-double calc_loglik (mat &Y, vec &eta, vec &gamma, double sigma_lambda, int T) {
+double calc_loglik (vec &gamma, mat &Y, vec &eta, double sigma_gamma, int T) {
   
   double loglik = 0;
   int t;
   vec Y_eta = Y * eta;
 
   for (t = 0; t <= T; t++) {
-    loglik = loglik - log(sigma_lambda) - 
-      (0.5 / pow(sigma_lambda, 2)) * pow(log(-log(1 - gamma(t))) - Y_eta(t), 2);
+    loglik = loglik - log(sigma_gamma) - 
+      (0.5 / pow(sigma_gamma, 2)) * pow(log(-log(1 - gamma(t))) - Y_eta(t), 2);
   }
 
   return loglik;
@@ -587,14 +584,14 @@ double calc_loglik (mat &Y, vec &eta, vec &gamma, double sigma_lambda, int T) {
 // [[Rcpp::export]]
 RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
   SEXP B, SEXP N,
-  SEXP X, SEXP mu, SEXP beta, SEXP sigma_beta, SEXP rho,
-  SEXP Y, SEXP eta, SEXP gamma, SEXP sigma_lambda, 
+  SEXP beta, SEXP X, SEXP mu, SEXP sigma_beta, SEXP rho,
+  SEXP gamma, SEXP Y, SEXP eta, SEXP sigma_gamma, 
   SEXP kappa, SEXP alpha, 
   SEXP Q, SEXP K, SEXP T, 
   SEXP nu_1, SEXP nu_2, 
-  SEXP nu_alpha_1, SEXP nu_alpha_2, 
   SEXP mu_tilde, SEXP sigma_mu,
   SEXP eta_tilde, SEXP sigma_eta,
+  SEXP nu_alpha_1, SEXP nu_alpha_2, 
   SEXP Delta, SEXP M,
   SEXP niter) {
   
@@ -604,15 +601,15 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
   NumericMatrix I_D_(I_D);
   NumericMatrix R_U_(R_U);
   NumericMatrix R_D_(R_D);
-
-  NumericMatrix mu_(mu);
+  
   NumericMatrix beta_(beta);
+  NumericMatrix mu_(mu);
   NumericVector sigma_beta_(sigma_beta);
   NumericVector rho_(rho);
-
-  NumericMatrix eta_(eta);
+  
   NumericMatrix gamma_(gamma);
-  NumericVector sigma_lambda_(sigma_lambda);
+  NumericMatrix eta_(eta);
+  NumericVector sigma_gamma_(sigma_gamma);
 
   NumericVector alpha_(alpha);
   
@@ -656,14 +653,14 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
   mat R_U_arma(R_U_.begin(), T_ + 1, M_, false);
   mat R_D_arma(R_D_.begin(), T_ + 1, M_, false);
 
-  mat mu_arma(mu_.begin(), Q_, M_, false);
   mat beta_arma(beta_.begin(), T_ + 1, M_, false);
+  mat mu_arma(mu_.begin(), Q_, M_, false);
   vec sigma_beta_arma(sigma_beta_.begin(), M_, false);
   vec rho_arma(rho_.begin(), M_, false);
-
-  mat eta_arma(eta_.begin(), K_, M_, false);
+  
   mat gamma_arma(gamma_.begin(), T_ + 1, M_, false);
-  vec sigma_lambda_arma(sigma_lambda_.begin(), M_, false);
+  mat eta_arma(eta_.begin(), K_, M_, false);
+  vec sigma_gamma_arma(sigma_gamma_.begin(), M_, false);
 
   vec alpha_arma(alpha_.begin(), M_, false);
 
@@ -690,12 +687,12 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
   vec I_D_arma_m(T_ + 1);
   vec R_U_arma_m(T_ + 1);
   vec R_D_arma_m(T_ + 1);
-
-  vec mu_arma_m(Q_);
+  
   vec beta_arma_m(T_ + 1);
-
-  vec eta_arma_m(K_);
+  vec mu_arma_m(Q_);
+  
   vec gamma_arma_m(T_ + 1);
+  vec eta_arma_m(K_);
 
 
   for (i = 0; i < niter_; i++){
@@ -708,44 +705,44 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
       I_D_arma_m = I_D_arma.col(m);
       R_U_arma_m = R_U_arma.col(m);
       R_D_arma_m = R_D_arma.col(m);
-
-      mu_arma_m = mu_arma.col(m);
+      
       beta_arma_m = beta_arma.col(m);
-      eta_arma_m = eta_arma.col(m);
+      mu_arma_m = mu_arma.col(m);
+      
       gamma_arma_m = gamma_arma.col(m);
+      eta_arma_m = eta_arma.col(m);
 
       update_I_U_0(S_arma_m, I_U_arma_m, I_D_arma_m, R_U_arma_m, R_D_arma_m, 
         B_arma, N_,
-        beta_arma_m, Y_arma, eta_arma_m, gamma_arma_m, sigma_lambda_arma(m), 
+        beta_arma_m, gamma_arma_m, Y_arma, eta_arma_m, sigma_gamma_arma(m), 
         kappa_, alpha_arma(m), T_, nu_1_, nu_2_, Delta_arma(m));
 
       for (t = 0; t <= T_; t++) {
         
         update_beta_t(S_arma_m, I_U_arma_m, I_D_arma_m, R_U_arma_m, R_D_arma_m, 
           B_arma, N_,
-          X_arma, mu_arma_m, beta_arma_m, sigma_beta_arma(m), rho_arma(m), 
-          Y_arma, eta_arma_m, gamma_arma_m, sigma_lambda_arma(m),
+          beta_arma_m, X_arma, mu_arma_m, sigma_beta_arma(m), rho_arma(m), 
+          gamma_arma_m, Y_arma, eta_arma_m, sigma_gamma_arma(m),
           kappa_, alpha_arma(m), t, T_, Delta_arma(m));
 
       }
       
-      update_mu_sigma_beta_rho (X_arma, mu_arma_m, beta_arma_m, 
+      update_mu_sigma_beta_rho (beta_arma_m, X_arma, mu_arma_m, 
         &sigma_beta_arma(m), &rho_arma(m),
         Q_, T_, mu_tilde_arma, sigma_mu_arma);
-      
 
       update_alpha(S_arma_m, I_U_arma_m, I_D_arma_m, R_U_arma_m, R_D_arma_m, 
         B_arma, N_,
-        beta_arma_m, Y_arma, eta_arma_m, gamma_arma_m, sigma_lambda_arma(m),
+        beta_arma_m, gamma_arma_m, Y_arma, eta_arma_m, sigma_gamma_arma(m),
         kappa_, &alpha_arma(m), T_,
         nu_alpha_1_, nu_alpha_2_, Delta_arma(m));
   
-      update_eta(Y_arma, eta_arma_m, gamma_arma_m, sigma_lambda_arma(m), 
-        K_, eta_tilde_arma, sigma_eta_, Delta_arma(m));
+      update_eta(gamma_arma_m, Y_arma, eta_arma_m, sigma_gamma_arma(m), K_, 
+        eta_tilde_arma, sigma_eta_, Delta_arma(m));
       
-      update_sigma_lambda(Y_arma, eta_arma_m, gamma_arma_m, &sigma_lambda_arma(m), T_, Delta_arma(m));
+      update_sigma_gamma(gamma_arma_m, Y_arma, eta_arma_m, &sigma_gamma_arma(m), T_, Delta_arma(m));
       
-      loglik(m) = calc_loglik(Y_arma, eta_arma_m, gamma_arma_m, sigma_lambda_arma(m), T_);
+      loglik(m) = calc_loglik(gamma_arma_m, Y_arma, eta_arma_m, sigma_gamma_arma(m), T_);
       
       S_arma.col(m) = S_arma_m;
       I_U_arma.col(m) = I_U_arma_m;
@@ -753,11 +750,11 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
       R_U_arma.col(m) = R_U_arma_m;
       R_D_arma.col(m) = R_D_arma_m;
       
-      mu_arma.col(m) = mu_arma_m;
       beta_arma.col(m) = beta_arma_m;
-
-      eta_arma.col(m) = eta_arma_m;
+      mu_arma.col(m) = mu_arma_m;
+      
       gamma_arma.col(m) = gamma_arma_m;
+      eta_arma.col(m) = eta_arma_m;
 
     }
     
@@ -777,11 +774,11 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
         I_D_arma.swap_cols(m, m + 1);
         R_U_arma.swap_cols(m, m + 1);
         R_D_arma.swap_cols(m, m + 1);
-
-        mu_arma.swap_cols(m, m + 1);
+        
         beta_arma.swap_cols(m, m + 1);
-        eta_arma.swap_cols(m, m + 1);
+        mu_arma.swap_cols(m, m + 1);
         gamma_arma.swap_cols(m, m + 1);
+        eta_arma.swap_cols(m, m + 1);
         
         temp_swap = sigma_beta_arma(m);
         sigma_beta_arma(m) = sigma_beta_arma(m + 1);
@@ -791,9 +788,9 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
         rho_arma(m) = rho_arma(m + 1);
         rho_arma(m + 1) = temp_swap;
 
-        temp_swap = sigma_lambda_arma(m);
-        sigma_lambda_arma(m) = sigma_lambda_arma(m + 1);
-        sigma_lambda_arma(m + 1) = temp_swap;
+        temp_swap = sigma_gamma_arma(m);
+        sigma_gamma_arma(m) = sigma_gamma_arma(m + 1);
+        sigma_gamma_arma(m + 1) = temp_swap;
 
         temp_swap = alpha_arma(m);
         alpha_arma(m) = alpha_arma(m + 1);
@@ -814,14 +811,14 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
   BaySIR_MCMC_output["R_U"] = R_U_arma;
   BaySIR_MCMC_output["R_D"] = R_D_arma;
 
-  BaySIR_MCMC_output["mu"] = mu_arma;
   BaySIR_MCMC_output["beta"] = beta_arma;
+  BaySIR_MCMC_output["mu"] = mu_arma;
   BaySIR_MCMC_output["sigma_beta"] = sigma_beta_arma;
   BaySIR_MCMC_output["rho"] = rho_arma;
 
-  BaySIR_MCMC_output["eta"] = eta_arma;
   BaySIR_MCMC_output["gamma"] = gamma_arma;
-  BaySIR_MCMC_output["sigma_lambda"] = sigma_lambda_arma;
+  BaySIR_MCMC_output["eta"] = eta_arma;
+  BaySIR_MCMC_output["sigma_gamma"] = sigma_gamma_arma;
   
   BaySIR_MCMC_output["alpha"] = alpha_arma;
 
