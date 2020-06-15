@@ -10,6 +10,8 @@ Link to manuscript: http://arxiv.org/abs/2006.05581
 First of all, you need [R](https://www.r-project.org/). For Windows users, [Rtools](https://cran.r-project.org/bin/windows/Rtools/) is needed. For Mac users, [Xcode](https://apps.apple.com/us/app/xcode/id497799835) may be needed.
 
 The `BaySIR` package has two dependencies: `Rcpp` and `RcppArmadillo`.
+BLAS/LAPACK libraries are needed by `RcppArmadillo`. Windows 7 users may have difficulties installing these.
+The package was tested on MacOS (High Sierra 10.13.6) and Windows 10.
 
 The `BaySIR` package can be easily installed with the `devtools` package in R. After `devtools` has been installed, run the following commands in R to install the `BaySIR` package.
 ```
