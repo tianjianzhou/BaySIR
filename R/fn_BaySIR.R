@@ -7,8 +7,8 @@
 #' Data of daily confirmed cases are needed. 
 #' The two functions are:
 #' \describe{
-#' \item{\code{BaySIR_MCMC}}{}
-#' \item{\code{BaySIR_predict}}{}
+#' \item{\code{\link{BaySIR_MCMC}}}{}
+#' \item{\code{\link{BaySIR_predict}}}{}
 #' }
 #' Use \code{?Function_Name} or \code{help(Function_Name)} to retrieve the 
 #' documentation for a specific function. E.g., \code{?BaySIR_MCMC}.
@@ -70,8 +70,11 @@ NULL
 #'                       the effective reproduction numbers for \code{T + 1} days at
 #'                       the \code{l}-th MCMC iteration.
 #'   \item \code{THETA_spls} MCMC samples of a specific parameter \code{THETA}. 
-#'                       Here, \code{THETA} can be \code{S}, \code{mu}, \code{eta},
-#'                       \code{alpha}, etc.
+#'                       Here, \code{THETA} can be \code{S}, \code{I_U}, \code{I_D},
+#'                       \code{R_U}, \code{R_D}, 
+#'                       \code{beta}, \code{mu}, \code{sigma_beta}, \code{rho},
+#'                       \code{gamma}, \code{eta}, \code{sigma_gamma}, and 
+#'                       \code{alpha}.
 #' }}
 #' \item{\code{MCMC_summary}}{Posterior summaries for the parameters.
 #' \itemize{
@@ -82,8 +85,11 @@ NULL
 #'                      For example, to access the posterior medians of R_eff, use
 #'                      \code{MCMC_summary$R_eff[ , 1]}.
 #'   \item \code{THETA} Posterior summaries of a specific parameter \code{THETA}. 
-#'                      Here, \code{THETA} can be \code{S}, \code{mu}, \code{eta},
-#'                      \code{alpha}, etc.
+#'                       Here, \code{THETA} can be \code{S}, \code{I_U}, \code{I_D},
+#'                       \code{R_U}, \code{R_D}, 
+#'                       \code{beta}, \code{mu}, \code{sigma_beta}, \code{rho},
+#'                       \code{gamma}, \code{eta}, \code{sigma_gamma}, and 
+#'                       \code{alpha}.
 #' }}
 #' }
 #' @examples
@@ -194,15 +200,15 @@ BaySIR_MCMC = function(B, I_D_0, N,
   I_D_spls = matrix(0, T + 1, niter)
   R_U_spls = matrix(0, T + 1, niter)
   R_D_spls = matrix(0, T + 1, niter)
-
-  mu_spls = matrix(0, Q, niter)
+  
   beta_spls = matrix(0, T + 1, niter)
+  mu_spls = matrix(0, Q, niter)
   sigma_beta_spls = rep(0, niter)
   rho_spls = rep(0, niter)
   
-  eta_spls = matrix(0, K, niter)
   gamma_spls = matrix(0, T + 1, niter)
-  sigma_lambda_spls = rep(0, niter)
+  eta_spls = matrix(0, K, niter)
+  sigma_gamma_spls = rep(0, niter)
 
   alpha_spls = rep(0, niter)
   
@@ -258,7 +264,7 @@ BaySIR_MCMC = function(B, I_D_0, N,
   
   
   eta_spls[ , 1] = c(log(-log(1 - 0.2)), rep(0, K-1))
-  sigma_lambda_spls[1] = 0.01
+  sigma_gamma_spls[1] = 0.01
   
 
   
@@ -273,14 +279,14 @@ BaySIR_MCMC = function(B, I_D_0, N,
   R_U_PT = matrix(0, T + 1, M)
   R_D_PT = matrix(0, T + 1, M)
   
-  mu_PT = matrix(0, Q, M)
   beta_PT = matrix(0, T + 1, M)
+  mu_PT = matrix(0, Q, M)
   sigma_beta_PT = rep(0, M)
   rho_PT = rep(0, M)
-
-  eta_PT = matrix(0, K, M)
+  
   gamma_PT = matrix(0, T + 1, M)
-  sigma_lambda_PT = rep(0, M)
+  eta_PT = matrix(0, K, M)
+  sigma_gamma_PT = rep(0, M)
 
   alpha_PT = rep(0, M)
   
@@ -290,14 +296,14 @@ BaySIR_MCMC = function(B, I_D_0, N,
   R_U_PT[] = R_U_spls[ , 1]
   R_D_PT[] = R_D_spls[ , 1]
   
-  mu_PT[] = mu_spls[ , 1]
   beta_PT[] = beta_spls[ , 1]
+  mu_PT[] = mu_spls[ , 1]
   sigma_beta_PT[] = sigma_beta_spls[1]
   rho_PT[] = rho_spls[1]
   
-  eta_PT[] = eta_spls[ , 1]
   gamma_PT[] = gamma_spls[ , 1]
-  sigma_lambda_PT[] = sigma_lambda_spls[1]
+  eta_PT[] = eta_spls[ , 1]
+  sigma_gamma_PT[] = sigma_gamma_spls[1]
   
   alpha_PT[] = alpha_spls[1]
   
@@ -316,15 +322,15 @@ BaySIR_MCMC = function(B, I_D_0, N,
                       R_D = R_D_PT,
                       B = B,
                       N = N, 
+                      beta = beta_PT,
                       X = X, 
                       mu = mu_PT, 
-                      beta = beta_PT, 
                       sigma_beta = sigma_beta_PT,
                       rho = rho_PT,
+                      gamma = gamma_PT, 
                       Y = Y,
                       eta = eta_PT, 
-                      gamma = gamma_PT, 
-                      sigma_lambda = sigma_lambda_PT,
+                      sigma_gamma = sigma_gamma_PT,
                       kappa = as.double(kappa),
                       alpha = alpha_PT,
                       Q = Q, 
@@ -332,12 +338,12 @@ BaySIR_MCMC = function(B, I_D_0, N,
                       T = T, 
                       nu_1 = as.double(nu_1), 
                       nu_2 = as.double(nu_2),
-                      nu_alpha_1 = nu_alpha_1,
-                      nu_alpha_2 = nu_alpha_2,
                       mu_tilde = mu_tilde, 
                       sigma_mu = as.double(sigma_mu),
                       eta_tilde = eta_tilde,
                       sigma_eta = as.double(sigma_eta),
+                      nu_alpha_1 = nu_alpha_1,
+                      nu_alpha_2 = nu_alpha_2,
                       Delta = Delta, M = M,
                       niter = burnin)
   
@@ -347,14 +353,14 @@ BaySIR_MCMC = function(B, I_D_0, N,
   R_U_PT = output_C$R_U
   R_D_PT = output_C$R_D
   
-  mu_PT = output_C$mu
   beta_PT = output_C$beta
+  mu_PT = output_C$mu
   sigma_beta_PT = output_C$sigma_beta
   rho_PT = output_C$rho
   
-  eta_PT = output_C$eta
   gamma_PT = output_C$gamma
-  sigma_lambda_PT = output_C$sigma_lambda
+  eta_PT = output_C$eta
+  sigma_gamma_PT = output_C$sigma_gamma
 
   alpha_PT = output_C$alpha
   
@@ -364,14 +370,14 @@ BaySIR_MCMC = function(B, I_D_0, N,
   R_U_spls[ , 1] = R_U_PT[ , 1]
   R_D_spls[ , 1] = R_D_PT[ , 1]
   
-  mu_spls[ , 1] = mu_PT[ , 1]
   beta_spls[ , 1] = beta_PT[ , 1]
+  mu_spls[ , 1] = mu_PT[ , 1]
   sigma_beta_spls[1] = sigma_beta_PT[1]
   rho_spls[1] = rho_PT[1]
   
-  eta_spls[ , 1] = eta_PT[ , 1]
   gamma_spls[ , 1] = gamma_PT[ , 1]
-  sigma_lambda_spls[1] = sigma_lambda_PT[1]
+  eta_spls[ , 1] = eta_PT[ , 1]
+  sigma_gamma_spls[1] = sigma_gamma_PT[1]
 
   alpha_spls[1] = alpha_PT[1]
 
@@ -391,16 +397,16 @@ BaySIR_MCMC = function(B, I_D_0, N,
                         R_U = R_U_PT,
                         R_D = R_D_PT,
                         B = B,
-                        N = N, 
+                        N = N,
+                        beta = beta_PT, 
                         X = X, 
                         mu = mu_PT, 
-                        beta = beta_PT, 
                         sigma_beta = sigma_beta_PT,
                         rho = rho_PT,
+                        gamma = gamma_PT, 
                         Y = Y,
                         eta = eta_PT, 
-                        gamma = gamma_PT, 
-                        sigma_lambda = sigma_lambda_PT,
+                        sigma_gamma = sigma_gamma_PT,
                         kappa = kappa,
                         alpha = alpha_PT,
                         Q = Q, 
@@ -408,12 +414,12 @@ BaySIR_MCMC = function(B, I_D_0, N,
                         T = T, 
                         nu_1 = nu_1, 
                         nu_2 = nu_2,
-                        nu_alpha_1 = nu_alpha_1, 
-                        nu_alpha_2 = nu_alpha_2,
                         mu_tilde = mu_tilde, 
                         sigma_mu = sigma_mu,
                         eta_tilde = eta_tilde,
                         sigma_eta = sigma_eta,
+                        nu_alpha_1 = nu_alpha_1, 
+                        nu_alpha_2 = nu_alpha_2,
                         Delta = Delta, M = M,
                         niter = thin)
   
@@ -423,14 +429,14 @@ BaySIR_MCMC = function(B, I_D_0, N,
     R_U_PT = output_C$R_U
     R_D_PT = output_C$R_D
     
-    mu_PT = output_C$mu
     beta_PT = output_C$beta
+    mu_PT = output_C$mu
     sigma_beta_PT = output_C$sigma_beta
     rho_PT = output_C$rho
     
-    eta_PT = output_C$eta
     gamma_PT = output_C$gamma
-    sigma_lambda_PT = output_C$sigma_lambda
+    eta_PT = output_C$eta
+    sigma_gamma_PT = output_C$sigma_gamma
 
     alpha_PT = output_C$alpha
     
@@ -440,14 +446,14 @@ BaySIR_MCMC = function(B, I_D_0, N,
     R_U_spls[ , i] = R_U_PT[ , 1]
     R_D_spls[ , i] = R_D_PT[ , 1]
     
-    mu_spls[ , i] = mu_PT[ , 1]
     beta_spls[ , i] = beta_PT[ , 1]
+    mu_spls[ , i] = mu_PT[ , 1]
     sigma_beta_spls[i] = sigma_beta_PT[1]
     rho_spls[i] = rho_PT[1]
     
-    eta_spls[ , i] = eta_PT[ , 1]
     gamma_spls[ , i] = gamma_PT[ , 1]
-    sigma_lambda_spls[i] = sigma_lambda_PT[1]
+    eta_spls[ , i] = eta_PT[ , 1]
+    sigma_gamma_spls[i] = sigma_gamma_PT[1]
 
     alpha_spls[i] = alpha_PT[1]
     
@@ -470,15 +476,15 @@ BaySIR_MCMC = function(B, I_D_0, N,
   MCMC_spls$I_D_spls = I_D_spls
   MCMC_spls$R_U_spls = R_U_spls
   MCMC_spls$R_D_spls = R_D_spls
-
-  MCMC_spls$mu_spls = mu_spls
+  
   MCMC_spls$beta_spls = beta_spls
+  MCMC_spls$mu_spls = mu_spls
   MCMC_spls$sigma_beta_spls = sigma_beta_spls
   MCMC_spls$rho_spls = rho_spls
-
-  MCMC_spls$eta_spls = eta_spls
+  
   MCMC_spls$gamma_spls = gamma_spls
-  MCMC_spls$sigma_lambda_spls = sigma_lambda_spls
+  MCMC_spls$eta_spls = eta_spls
+  MCMC_spls$sigma_gamma_spls = sigma_gamma_spls
   
   MCMC_spls$alpha_spls = alpha_spls
 
@@ -493,14 +499,14 @@ BaySIR_MCMC = function(B, I_D_0, N,
   MCMC_summary$R_U = t(apply(R_U_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
   MCMC_summary$R_D = t(apply(R_D_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
   
-  MCMC_summary$mu = t(apply(mu_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
   MCMC_summary$beta = t(apply(beta_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
+  MCMC_summary$mu = t(apply(mu_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
   MCMC_summary$sigma_beta = quantile(sigma_beta_spls, probs = c(0.5, 0.025, 0.975))
   MCMC_summary$rho = quantile(rho_spls, probs = c(0.5, 0.025, 0.975))
-
-  MCMC_summary$eta = t(apply(eta_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
+  
   MCMC_summary$gamma = t(apply(gamma_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
-  MCMC_summary$sigma_lambda = quantile(sigma_lambda_spls, probs = c(0.5, 0.025, 0.975))
+  MCMC_summary$eta = t(apply(eta_spls, 1, function(x) quantile(x, probs = c(0.5, 0.025, 0.975))))
+  MCMC_summary$sigma_gamma = quantile(sigma_gamma_spls, probs = c(0.5, 0.025, 0.975))
   
   MCMC_summary$alpha = quantile(alpha_spls, probs = c(0.5, 0.025, 0.975))
 
@@ -702,14 +708,14 @@ BaySIR_predict = function(T_pred = 10, MCMC_spls,
   R_U_spls = MCMC_spls$R_U_spls
   R_D_spls = MCMC_spls$R_D_spls
 
-  mu_spls = MCMC_spls$mu_spls
   beta_spls = MCMC_spls$beta_spls
+  mu_spls = MCMC_spls$mu_spls
   sigma_beta_spls = MCMC_spls$sigma_beta_spls
   rho_spls = MCMC_spls$rho_spls
 
-  eta_spls = MCMC_spls$eta_spls
   gamma_spls = MCMC_spls$gamma_spls
-  sigma_lambda_spls = MCMC_spls$sigma_lambda_spls
+  eta_spls = MCMC_spls$eta_spls
+  sigma_gamma_spls = MCMC_spls$sigma_gamma_spls
   
   alpha_spls = MCMC_spls$alpha_spls
 
@@ -742,8 +748,8 @@ BaySIR_predict = function(T_pred = 10, MCMC_spls,
   R_U_pred_spls = matrix(0, T_pred + 1, niter)
   R_D_pred_spls = matrix(0, T_pred + 1, niter)
   
-  gamma_pred_spls = matrix(0, T_pred, niter)
   beta_pred_spls = matrix(0, T_pred, niter)
+  gamma_pred_spls = matrix(0, T_pred, niter)
   
   ############################################################
   ## Sample from posterior predictive distribution
@@ -765,7 +771,7 @@ BaySIR_predict = function(T_pred = 10, MCMC_spls,
     alpha = alpha_spls[i]
 
     eta = eta_spls[ , i]
-    sigma_lambda = sigma_lambda_spls[i]
+    sigma_gamma = sigma_gamma_spls[i]
 
     
     S_last = S_spls[T + 1, i]
@@ -786,7 +792,7 @@ BaySIR_predict = function(T_pred = 10, MCMC_spls,
     R_U_pred_spls[1, i] = R_U_last + alpha * I_U_last
     R_D_pred_spls[1, i] = R_D_last + alpha * I_D_last
 
-    epsilon_pred = rnorm(T_pred, 0, sigma_lambda)
+    epsilon_pred = rnorm(T_pred, 0, sigma_gamma)
     gamma_pred_spls[ , i] = 1 - exp(-exp(c(Y_pred %*% eta + epsilon_pred)))
 
 
