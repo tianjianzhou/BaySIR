@@ -67,8 +67,11 @@ A list of the following:
                       the effective reproduction numbers for \code{T + 1} days at
                       the \code{l}-th MCMC iteration.
   \item \code{THETA_spls} MCMC samples of a specific parameter \code{THETA}. 
-                      Here, \code{THETA} can be \code{S}, \code{mu}, \code{eta},
-                      \code{alpha}, etc.
+                      Here, \code{THETA} can be \code{S}, \code{I_U}, \code{I_D},
+                      \code{R_U}, \code{R_D}, 
+                      \code{beta}, \code{mu}, \code{sigma_beta}, \code{rho},
+                      \code{gamma}, \code{eta}, \code{sigma_gamma}, and 
+                      \code{alpha}.
 }}
 \item{\code{MCMC_summary}}{Posterior summaries for the parameters.
 \itemize{
@@ -79,8 +82,11 @@ A list of the following:
                      For example, to access the posterior medians of R_eff, use
                      \code{MCMC_summary$R_eff[ , 1]}.
   \item \code{THETA} Posterior summaries of a specific parameter \code{THETA}. 
-                     Here, \code{THETA} can be \code{S}, \code{mu}, \code{eta},
-                     \code{alpha}, etc.
+                      Here, \code{THETA} can be \code{S}, \code{I_U}, \code{I_D},
+                      \code{R_U}, \code{R_D}, 
+                      \code{beta}, \code{mu}, \code{sigma_beta}, \code{rho},
+                      \code{gamma}, \code{eta}, \code{sigma_gamma}, and 
+                      \code{alpha}.
 }}
 }
 }

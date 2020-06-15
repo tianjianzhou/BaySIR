@@ -11,8 +11,8 @@ specific country/region, and predicting future case counts.
 Data of daily confirmed cases are needed. 
 The two functions are:
 \describe{
-\item{\code{BaySIR_MCMC}}{}
-\item{\code{BaySIR_predict}}{}
+\item{\code{\link{BaySIR_MCMC}}}{}
+\item{\code{\link{BaySIR_predict}}}{}
 }
 Use \code{?Function_Name} or \code{help(Function_Name)} to retrieve the 
 documentation for a specific function. E.g., \code{?BaySIR_MCMC}.
