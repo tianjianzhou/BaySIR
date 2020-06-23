@@ -766,7 +766,7 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
       log_prob_swap = (1 / Delta_arma(m) - 1 / Delta_arma(m+1)) * 
         (loglik(m + 1) - loglik(m));
       
-      if (0){
+      if (log(u) < log_prob_swap){
       // if (log(u) < log_prob_swap){
         
         S_arma.swap_cols(m, m + 1);
