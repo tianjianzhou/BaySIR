@@ -2,9 +2,12 @@
 **Semiparametric Bayesian Inference for the Transmission Dynamics of COVID-19 with a State-Space Model**
 
 I am actively updating the package. Please visit again for the latest version!
-[6/23] There has been a mistake so that the earlier version of this package does not implement the parallel tempering procedure (now fixed of course). Please install again for the updated version.
 
 Link to manuscript: http://arxiv.org/abs/2006.05581
+
+## News
+[6/23] There has been a mistake so that the earlier version of this package does not implement the parallel tempering procedure (now fixed of course). Please install again for the updated version.
+
 
 ## Installation
 
