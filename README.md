@@ -108,7 +108,9 @@ predict_list$pred_summary$R_eff
     - `niter`: number of MCMC samples to return. Default is `1000`. The total number of MCMC iterations to be run is `niter * thin + burnin`.
     - `burnin`: number of MCMC iterations that will be discarded as initial burn-in. Default is `10000`.
     - `thin`: meaning keep 1 draw every `thin` MCMC iterations. Default is `20`.
+    - `link`: the link function to be used for the diagnosis rate (the rate is between 0 and 1, and the link function transforms it to the real line). `1`, `2` and `3` represent the logit, probit and complementary log-log link, respectively. Default is `1`.
     - `Delta`: a monotonically increasing vector (each element is larger than the previous) defining the temperatures of the parallel Markov chains (parallel tempering). The first element must be 1, corresponding to the original posterior. Default is `1.5^(0:9)`.
+    - `nu_alpha_1` and `nu_alpha_2`: prior shape and rate parameters for the length of the infectious period. `1 / alpha ~ Gamma(nu_alpha_1, nu_alpha_2)`. Default values are `325.5` and `35`, resulting in a prior mean of 9.3 (days) for `1 / alpha`. `nu_alpha_1` and `nu_alpha_2` may be changed to reflect different modeling assumptions. For example, if one defines the infectious period as the time from infection to recovery/death, then a larger prior mean (~ 25 days) for `1 / alpha` should be chosen (see, e.g., [Verity et al., The Lancet Infectious Diseases](https://www.thelancet.com/journals/laninf/article/PIIS1473-3099(20)30243-7/fulltext)).
 
 - Output
   - A list of the following:
@@ -132,6 +134,7 @@ predict_list$pred_summary$R_eff
     - `Y_pred`: a `T_pred * K` matrix, covariates related to the diagnosis rate for future days `T + 1, ..., T + T_pred`. Default contains only an intercept term, `Y_pred[t, ] = 1`. Note that if number of tests is used as a covariate, we do not know what the number of tests will be in the future and have to impute its future value. 
     - `X`: a `(T + 1) * Q` matrix, covariates related to the disease transmission rate. Default is an intercept term plus a time trend, `X[t, ] = (1, t)`.
     - `Y`: a `(T + 1) * K` matrix, covariates related to the diagnosis rate. Default contains only an intercept term, `Y[t, ] = 1`.
+    - `link`: the link function to be used for the diagnosis rate (the rate is between 0 and 1, and the link function transforms it to the real line). `1`, `2` and `3` represent the logit, probit and complementary log-log link, respectively. Default is `1`.
     
 - Output
   - A list of the following:
