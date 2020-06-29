@@ -55,10 +55,22 @@ NULL
 #'               initial burn-in. Default is \code{10000}.
 #' @param thin Optional, meaning keep 1 draw every \code{thin} MCMC iterations. 
 #'             Default is \code{20}.
+#' @param link Optional. The link function to be used for the diagnosis rate (the rate 
+#'             is between 0 and 1, and the link function transforms it to the real line).
+#'             \code{1}, \code{2} and \code{3} represent the logit, probit and 
+#'             complementary log-log link, respectively. Default is \code{1}.
 #' @param Delta Optional. A monotonically increasing vector (each element is larger 
 #'              than the previous) defining the temperatures of the parallel Markov 
 #'              chains (parallel tempering). The first element must be \code{1},  
 #'              corresponding to the original posterior. Default is \code{1.5^(0:9)}.
+#' @param nu_alpha_1 Optional. Prior shape parameter for the length of the infectious
+#'        period (\code{1 / alpha}). Default is \code{325.5}.
+#' @param nu_alpha_2 Optional. Prior rate parameter for the length of the infectious
+#'        period (\code{1 / alpha}). Default is \code{35}, meaning the prior mean for
+#'        the infectious period is 9.3 days. \code{nu_alpha_1} and \code{nu_alpha_2}
+#'        may be changed to reflect different modeling assumptions. For example, if 
+#'        one defines the infectious period as the time from infection to recovery/death,
+#'        then a larger prior mean (~ 25 days) for \code{1 / alpha} should be chosen.
 #'
 #' @return A list of the following:
 #' \describe{
@@ -116,7 +128,9 @@ BaySIR_MCMC = function(B, I_D_0, N,
   confirmed_cases_cum = NULL,
   X = NULL, Y = NULL, 
   kappa = 1,
-  niter = 1000, burnin = 10000, thin = 20, Delta = (1.5)^(0:9)) {
+  niter = 1000, burnin = 20000, thin = 30, 
+  link = 1, Delta = (1.5)^(0:9),
+  nu_alpha_1 = 325.5, nu_alpha_2 = 35) {
   
   if (missing(B) | missing(I_D_0)) {
     
@@ -183,13 +197,11 @@ BaySIR_MCMC = function(B, I_D_0, N,
   nu_1 = 5
   nu_2 = 1
 
-  nu_alpha_1 = 175
-  nu_alpha_2 = 25
-
   mu_tilde = c(log(2.5 * nu_alpha_2 / nu_alpha_1),rep(0, Q-1))
   sigma_mu = c(0.3, rep(1, Q-1))
-
-  eta_tilde = c(log(-log(1 - 0.5)), rep(0, K-1))
+  
+  eta_tilde = rep(0, K)
+  # eta_tilde = c(log(-log(1 - 0.5)), rep(0, K-1))
   sigma_eta = 1
 
   #################################################################
@@ -263,7 +275,7 @@ BaySIR_MCMC = function(B, I_D_0, N,
   }
   
   
-  eta_spls[ , 1] = c(log(-log(1 - 0.2)), rep(0, K-1))
+  eta_spls[ , 1] = c(-1.4, rep(0, K-1))
   sigma_gamma_spls[1] = 0.01
   
 
@@ -345,6 +357,7 @@ BaySIR_MCMC = function(B, I_D_0, N,
                       nu_alpha_1 = nu_alpha_1,
                       nu_alpha_2 = nu_alpha_2,
                       Delta = Delta, M = M,
+                      link = link,
                       niter = burnin)
   
   S_PT = output_C$S
@@ -421,6 +434,7 @@ BaySIR_MCMC = function(B, I_D_0, N,
                         nu_alpha_1 = nu_alpha_1, 
                         nu_alpha_2 = nu_alpha_2,
                         Delta = Delta, M = M,
+                        link = link,
                         niter = thin)
   
     S_PT = output_C$S
@@ -567,6 +581,10 @@ BaySIR_MCMC = function(B, I_D_0, N,
 #'          \code{X[t, ] = (1, t)}.
 #' @param Y Optional. A \code{(T + 1) * K} matrix, covariates related to the diagnosis 
 #'          rate. Default is only an intercept term, \code{Y[t, ] = 1}.
+#' @param link Optional. The link function to be used for the diagnosis rate (the rate 
+#'             is between 0 and 1, and the link function transforms it to the real line).
+#'             \code{1}, \code{2} and \code{3} represent the logit, probit and 
+#'             complementary log-log link, respectively. Default is \code{1}.
 #'
 #' @return A list of the following:
 #' \describe{
@@ -643,7 +661,7 @@ BaySIR_predict = function(T_pred = 10, MCMC_spls,
   confirmed_cases_cum = NULL,
   X_pred = NULL, Y_pred = NULL,
   X = NULL, Y = NULL, 
-  kappa = 1) {
+  kappa = 1, link = 1) {
   
   ############################################################
   ## Setup
@@ -793,7 +811,18 @@ BaySIR_predict = function(T_pred = 10, MCMC_spls,
     R_D_pred_spls[1, i] = R_D_last + alpha * I_D_last
 
     epsilon_pred = rnorm(T_pred, 0, sigma_gamma)
-    gamma_pred_spls[ , i] = 1 - exp(-exp(c(Y_pred %*% eta + epsilon_pred)))
+    
+    if (link == 2) {
+      # probit
+      gamma_pred_spls[ , i] = pnorm(c(Y_pred %*% eta + epsilon_pred))
+    } else if (link == 3) {
+      # cloglog
+      gamma_pred_spls[ , i] = 1 - exp(-exp(c(Y_pred %*% eta + epsilon_pred)))
+    } else {
+      # logit
+      gamma_pred_spls[ , i] = 1 / (1 + exp(-c(Y_pred %*% eta + epsilon_pred)))
+    }
+    
 
 
     for (t in 1:T_pred) {
