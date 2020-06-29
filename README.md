@@ -5,8 +5,9 @@ I am actively updating the package. Please visit again for the latest version!
 
 Link to manuscript: http://arxiv.org/abs/2006.05581
 
-## News
-[6/23] There has been a mistake so that the earlier version of this package does not implement the parallel tempering procedure (now fixed of course). Please install again for the updated version.
+## Updates
+**[6/29]** Changed the prior mean for the infectious period to 9.3 days (based on [He et al., Nature Medicine](https://www.nature.com/articles/s41591-020-0869-5)). Previously it was 7 days. Also, added different specifications for the link function of the diagnosis rate (logit, probit, cloglog). Previously cloglog was used as default. Please install again for the updated version.
+**[6/23]** There has been a mistake so that the earlier version of this package does not implement the parallel tempering procedure (now fixed of course). Please install again for the updated version.
 
 
 ## Installation
