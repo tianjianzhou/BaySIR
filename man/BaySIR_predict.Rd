@@ -15,7 +15,8 @@ BaySIR_predict(
   Y_pred = NULL,
   X = NULL,
   Y = NULL,
-  kappa = 1
+  kappa = 1,
+  link = 1
 )
 }
 \arguments{
@@ -55,6 +56,11 @@ transmission rate. Default is an intercept term plus a time trend,
 
 \item{Y}{Optional. A \code{(T + 1) * K} matrix, covariates related to the diagnosis 
 rate. Default is only an intercept term, \code{Y[t, ] = 1}.}
+
+\item{link}{Optional. The link function to be used for the diagnosis rate (the rate 
+is between 0 and 1, and the link function transforms it to the real line).
+\code{1}, \code{2} and \code{3} represent the logit, probit and 
+complementary log-log link, respectively. Default is \code{1}.}
 }
 \value{
 A list of the following:

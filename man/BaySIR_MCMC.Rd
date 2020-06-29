@@ -13,9 +13,12 @@ BaySIR_MCMC(
   Y = NULL,
   kappa = 1,
   niter = 1000,
-  burnin = 10000,
-  thin = 20,
-  Delta = (1.5)^(0:9)
+  burnin = 20000,
+  thin = 30,
+  link = 1,
+  Delta = (1.5)^(0:9),
+  nu_alpha_1 = 325.5,
+  nu_alpha_2 = 35
 )
 }
 \arguments{
@@ -51,10 +54,25 @@ initial burn-in. Default is \code{10000}.}
 \item{thin}{Optional, meaning keep 1 draw every \code{thin} MCMC iterations. 
 Default is \code{20}.}
 
+\item{link}{Optional. The link function to be used for the diagnosis rate (the rate 
+is between 0 and 1, and the link function transforms it to the real line).
+\code{1}, \code{2} and \code{3} represent the logit, probit and 
+complementary log-log link, respectively. Default is \code{1}.}
+
 \item{Delta}{Optional. A monotonically increasing vector (each element is larger 
 than the previous) defining the temperatures of the parallel Markov 
 chains (parallel tempering). The first element must be \code{1},  
 corresponding to the original posterior. Default is \code{1.5^(0:9)}.}
+
+\item{nu_alpha_1}{Optional. Prior shape parameter for the length of the infectious
+period (\code{1 / alpha}). Default is \code{325.5}.}
+
+\item{nu_alpha_2}{Optional. Prior rate parameter for the length of the infectious
+period (\code{1 / alpha}). Default is \code{35}, meaning the prior mean for
+the infectious period is 9.3 days. \code{nu_alpha_1} and \code{nu_alpha_2}
+may be changed to reflect different modeling assumptions. For example, if 
+one defines the infectious period as the time from infection to recovery/death,
+then a larger prior mean (~ 25 days) for \code{1 / alpha} should be chosen.}
 }
 \value{
 A list of the following:
