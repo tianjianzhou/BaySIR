@@ -6,6 +6,47 @@ using namespace Rcpp;
 using namespace arma;
 
 
+
+
+double logit(double x) {
+
+  return(log(x / (1.0 - x)));
+
+}
+
+
+double probit(double x) {
+
+  return(R::qnorm(x, 0.0, 1.0, 1, 0));
+
+}
+
+
+
+
+double cloglog(double x) {
+
+  return(log(-log(1.0 - x)));
+   
+}
+
+
+double gamma_link(double gamma, int link) {
+
+  if (link == 2) {
+    return(probit(gamma));
+  } 
+  else if (link == 3) {
+    return(cloglog(gamma));
+  }
+  else {
+    return(logit(gamma));
+  }
+
+}
+
+
+
 vec mvrnorm(vec &mu, mat &Sigma) {
   
   vec X; X.randn(mu.size());
@@ -24,7 +65,7 @@ void update_I_U_0 (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
   vec &beta, 
   vec &gamma, mat &Y, vec &eta, double sigma_gamma,
   double kappa, double alpha, 
-  int T, double nu_1, double nu_2,
+  int T, double nu_1, double nu_2, int link,
   double Tmp){
   
   double h, A_t;
@@ -46,7 +87,7 @@ void update_I_U_0 (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
   R_U_pro(0) = 0;
 
   gamma_pro(0) = B(0) / ( (1.0 - alpha) * I_U_pro(0) );
-  gamma_tilde_pro(0) = log(-log(1 - gamma_pro(0)));
+  gamma_tilde_pro(0) = gamma_link(gamma_pro(0), link);
 
   for (t = 0; t < T; t++) {
     
@@ -62,7 +103,7 @@ void update_I_U_0 (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
     R_U_pro(t + 1) = R_U_pro(t) + alpha * I_U_pro(t);
     
     gamma_pro(t + 1) = B(t + 1) / ( (1.0 - alpha) * I_U_pro(t + 1) );
-    gamma_tilde_pro(t + 1) = log(-log(1 - gamma_pro(t + 1)));
+    gamma_tilde_pro(t + 1) = gamma_link(gamma_pro(t + 1), link);
     
   }
 
@@ -79,7 +120,7 @@ void update_I_U_0 (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
 
       loglik_diff = loglik_diff - (0.5 / pow(sigma_gamma, 2)) * 
         ( pow(gamma_tilde_pro(t) - Y_eta(t), 2) - 
-          pow(log(-log(1 - gamma(t))) - Y_eta(t), 2) );
+          pow(gamma_link(gamma(t), link) - Y_eta(t), 2) );
     
     }
 
@@ -125,7 +166,7 @@ void update_beta_t (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
   vec &beta, mat &X, vec &mu, double sigma_beta, double rho,
   vec &gamma, mat &Y, vec &eta, double sigma_gamma,
   double kappa, double alpha,
-  int t, int T,
+  int t, int T, int link,
   double Tmp) {
   
 
@@ -166,7 +207,7 @@ void update_beta_t (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
   R_U_pro(0) = R_U(0);
   
   gamma_pro(0) = B(0) / ( (1.0 - alpha) * I_U_pro(0) );
-  gamma_tilde_pro(0) = log(-log(1 - gamma_pro(0)));
+  gamma_tilde_pro(0) = gamma_link(gamma_pro(0), link);
   
 
   for (tt = 0; tt < T; tt++) {
@@ -188,7 +229,7 @@ void update_beta_t (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
     R_U_pro(tt + 1) = R_U_pro(tt) + alpha * I_U_pro(tt);
     
     gamma_pro(tt + 1) = B(tt + 1) / ( (1.0 - alpha) * I_U_pro(tt + 1) );
-    gamma_tilde_pro(tt + 1) = log(-log(1 - gamma_pro(tt + 1)));
+    gamma_tilde_pro(tt + 1) = gamma_link(gamma_pro(tt + 1), link);
 
   }
 
@@ -205,7 +246,7 @@ void update_beta_t (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
 
       loglik_diff = loglik_diff - (0.5 / pow(sigma_gamma, 2)) * 
         ( pow(gamma_tilde_pro(tt) - Y_eta(tt), 2) - 
-          pow(log(-log(1 - gamma(tt))) - Y_eta(tt), 2) );
+          pow(gamma_link(gamma(tt), link) - Y_eta(tt), 2) );
     
     }
     
@@ -378,7 +419,7 @@ void update_alpha (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
   vec &beta, 
   vec &gamma, mat &Y, vec &eta, double sigma_gamma,
   double kappa, double *alpha, int T,
-  double nu_alpha_1, double nu_alpha_2,
+  double nu_alpha_1, double nu_alpha_2, int link,
   double Tmp) {
   
   double alpha_cur = *alpha;
@@ -415,7 +456,7 @@ void update_alpha (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
     R_D_pro(0) = R_D(0);
     
     gamma_pro(0) = B(0) / ( (1.0 - alpha_pro) * I_U_pro(0) );
-    gamma_tilde_pro(0) = log(-log(1 - gamma_pro(0)));
+    gamma_tilde_pro(0) = gamma_link(gamma_pro(0), link);
     
     for (t = 0; t < T; t++) {
     
@@ -433,7 +474,7 @@ void update_alpha (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
       R_D_pro(t + 1) = R_D_pro(t) + alpha_pro * I_D_pro(t);
     
       gamma_pro(t + 1) = B(t + 1) / ( (1.0 - alpha_pro) * I_U_pro(t + 1) );
-      gamma_tilde_pro(t + 1) = log(-log(1 - gamma_pro(t + 1)));
+      gamma_tilde_pro(t + 1) = gamma_link(gamma_pro(t + 1), link);
 
     }
 
@@ -452,7 +493,7 @@ void update_alpha (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
 
       loglik_diff = loglik_diff - (0.5 / pow(sigma_gamma, 2)) * 
         ( pow(gamma_tilde_pro(t) - Y_eta(t), 2) - 
-          pow(log(-log(1 - gamma(t))) - Y_eta(t), 2) );
+          pow(gamma_link(gamma(t), link) - Y_eta(t), 2) );
     
     }
     
@@ -501,9 +542,14 @@ void update_alpha (vec &S, vec &I_U, vec &I_D, vec &R_U, vec &R_D,
 
 void update_eta (vec &gamma, mat &Y, vec &eta, double sigma_gamma, int K,
   vec &eta_tilde, double sigma_eta,
-  double Tmp) {
+  int T, int link, double Tmp) {
 
-  vec gamma_tilde = log(-log(1 - gamma));
+  vec gamma_tilde(T + 1);
+  
+  int t;
+  for (t = 0; t <= T; t++) {
+    gamma_tilde(t) = gamma_link(gamma(t), link);
+  }
 
   // vec eta_pro;
   mat eta_post_cov;
@@ -533,19 +579,19 @@ void update_eta (vec &gamma, mat &Y, vec &eta, double sigma_gamma, int K,
 
 
 void update_sigma_gamma (vec &gamma, mat &Y, vec &eta, double *sigma_gamma,
-  int T, double Tmp) {
+  int T, int link, double Tmp) {
   
   double sigma_gamma_post_shape, sigma_gamma_post_rate;
   int t;
 
   vec Y_eta = Y * eta;
   
-  sigma_gamma_post_shape = 11.0 + 0.5 * ((double) T + 1.0) / Tmp;
+  sigma_gamma_post_shape = 1.0 + 0.5 * ((double) T + 1.0) / Tmp;
   sigma_gamma_post_rate = 1.0;
 
   for (t = 0; t <= T; t++) {
     sigma_gamma_post_rate = sigma_gamma_post_rate + 
-      0.5 * pow(log(-log(1 - gamma(t))) - Y_eta(t), 2) / Tmp;
+      0.5 * pow(gamma_link(gamma(t), link) - Y_eta(t), 2) / Tmp;
   }
   
   *sigma_gamma = 1.0 / sqrt(R::rgamma(sigma_gamma_post_shape, 1.0 / sigma_gamma_post_rate));
@@ -560,7 +606,7 @@ void update_sigma_gamma (vec &gamma, mat &Y, vec &eta, double *sigma_gamma,
 
 
 
-double calc_loglik (vec &gamma, mat &Y, vec &eta, double sigma_gamma, int T) {
+double calc_loglik (vec &gamma, mat &Y, vec &eta, double sigma_gamma, int link, int T) {
   
   double loglik = 0;
   int t;
@@ -568,7 +614,7 @@ double calc_loglik (vec &gamma, mat &Y, vec &eta, double sigma_gamma, int T) {
 
   for (t = 0; t <= T; t++) {
     loglik = loglik - log(sigma_gamma) - 
-      (0.5 / pow(sigma_gamma, 2)) * pow(log(-log(1 - gamma(t))) - Y_eta(t), 2);
+      (0.5 / pow(sigma_gamma, 2)) * pow(gamma_link(gamma(t), link) - Y_eta(t), 2);
   }
 
   return loglik;
@@ -593,6 +639,7 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
   SEXP eta_tilde, SEXP sigma_eta,
   SEXP nu_alpha_1, SEXP nu_alpha_2, 
   SEXP Delta, SEXP M,
+  SEXP link,
   SEXP niter) {
   
   // All variables
@@ -641,6 +688,7 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
   
   NumericVector Delta_(Delta);
   int M_ = as <int> (M);
+  int link_ = as <int> (link);
   int niter_ = as <int> (niter);
 
 
@@ -715,7 +763,7 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
       update_I_U_0(S_arma_m, I_U_arma_m, I_D_arma_m, R_U_arma_m, R_D_arma_m, 
         B_arma, N_,
         beta_arma_m, gamma_arma_m, Y_arma, eta_arma_m, sigma_gamma_arma(m), 
-        kappa_, alpha_arma(m), T_, nu_1_, nu_2_, Delta_arma(m));
+        kappa_, alpha_arma(m), T_, nu_1_, nu_2_, link_, Delta_arma(m));
 
       for (t = 0; t <= T_; t++) {
         
@@ -723,7 +771,7 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
           B_arma, N_,
           beta_arma_m, X_arma, mu_arma_m, sigma_beta_arma(m), rho_arma(m), 
           gamma_arma_m, Y_arma, eta_arma_m, sigma_gamma_arma(m),
-          kappa_, alpha_arma(m), t, T_, Delta_arma(m));
+          kappa_, alpha_arma(m), t, T_, link_, Delta_arma(m));
 
       }
       
@@ -735,14 +783,16 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
         B_arma, N_,
         beta_arma_m, gamma_arma_m, Y_arma, eta_arma_m, sigma_gamma_arma(m),
         kappa_, &alpha_arma(m), T_,
-        nu_alpha_1_, nu_alpha_2_, Delta_arma(m));
+        nu_alpha_1_, nu_alpha_2_, link_, Delta_arma(m));
   
       update_eta(gamma_arma_m, Y_arma, eta_arma_m, sigma_gamma_arma(m), K_, 
-        eta_tilde_arma, sigma_eta_, Delta_arma(m));
+        eta_tilde_arma, sigma_eta_, T_, link_, Delta_arma(m));
       
-      update_sigma_gamma(gamma_arma_m, Y_arma, eta_arma_m, &sigma_gamma_arma(m), T_, Delta_arma(m));
+      update_sigma_gamma(gamma_arma_m, Y_arma, eta_arma_m, &sigma_gamma_arma(m), T_, 
+        link_, Delta_arma(m));
       
-      loglik(m) = calc_loglik(gamma_arma_m, Y_arma, eta_arma_m, sigma_gamma_arma(m), T_);
+      loglik(m) = calc_loglik(gamma_arma_m, Y_arma, eta_arma_m, sigma_gamma_arma(m), 
+        link_, T_);
       
       S_arma.col(m) = S_arma_m;
       I_U_arma.col(m) = I_U_arma_m;
@@ -766,8 +816,8 @@ RcppExport SEXP BaySIR_MCMC_cpp (SEXP S, SEXP I_U, SEXP I_D, SEXP R_U, SEXP R_D,
       log_prob_swap = (1 / Delta_arma(m) - 1 / Delta_arma(m+1)) * 
         (loglik(m + 1) - loglik(m));
       
-      if (log(u) < log_prob_swap){
-      // if (log(u) < log_prob_swap){
+      if (log(u) < log_prob_swap) {
+      // if (log(u) < log_prob_swap) {
         
         S_arma.swap_cols(m, m + 1);
         I_U_arma.swap_cols(m, m + 1);
