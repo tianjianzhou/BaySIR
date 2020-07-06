@@ -6,7 +6,7 @@ I am actively updating the package. Please visit again for the latest version!
 Link to manuscript: http://arxiv.org/abs/2006.05581
 
 ## Updates
-**[6/29]** The default prior mean for the infectious period is changed to 9.3 days (based on [He et al., Nature Medicine](https://www.nature.com/articles/s41591-020-0869-5) and [this webpage](https://theconversation.com/how-long-are-you-infectious-when-you-have-coronavirus-135295)). Previously it was 7 days. Also, the user is now allowed to specify the link function for the diagnosis rate (logit, probit, cloglog, where logit is the default). Previously cloglog was used as default. Please install again for the updated version.
+**[6/29]** The default prior mean for the infectious period is changed to 9.3 days (based on [He et al., Nature Medicine](https://www.nature.com/articles/s41591-020-0869-5) and [this webpage](https://theconversation.com/how-long-are-you-infectious-when-you-have-coronavirus-135295)). Previously it was 7 days. Also, the user is now allowed to specify the link function for the diagnosis rate (logit, probit, cloglog, where logit is the default). Previously cloglog was used as default. See the updated [manuscript](http://arxiv.org/abs/2006.05581) for details. Please install again for the updated version.
 
 **[6/23]** There has been a mistake so that the earlier version of this package does not implement the parallel tempering procedure (now fixed of course). Please install again for the updated version.
 
