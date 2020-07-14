@@ -244,11 +244,11 @@ BaySIR_MCMC = function(B, I_D_0, N,
   R_U_spls[1, 1] = 0
   
   rho_spls[1] = 0.9
-  sigma_beta_spls[1] = 0.1
+  sigma_beta_spls[1] = 0.02
   
   # basic 
-  BRN_start = 2.5
-  BRN_end = 2
+  BRN_start = 2
+  BRN_end = 1
 
   while (any(I_U_spls[ , 1] <= 0) | 
          any(gamma_spls[ , 1] <= 0) |
@@ -269,9 +269,13 @@ BaySIR_MCMC = function(B, I_D_0, N,
     gamma_spls[ , 1] = B / ((1 - alpha_spls[1]) * I_U_spls[ , 1])
 
     BRN_start = BRN_start + 0.05
-    BRN_end = BRN_end + 0.05
+    # BRN_end = BRN_end + 0.05
     # print(sprintf("Try again, BRN_start = %.2f, BRN_end = %.2f", BRN_start, BRN_end))
-
+    
+    if (BRN_start > 30) {
+      stop("Parameter initialization fails...")
+    }
+    
   }
   
   
