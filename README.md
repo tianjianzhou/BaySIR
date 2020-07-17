@@ -3,7 +3,7 @@
 
 - Link to the manuscript: http://arxiv.org/abs/2006.05581
 
-- For analysis results of U.S. data, see this webpage: http://covid19.laiyaconsulting.com/baysir
+- For analysis results of U.S. data, see this webpage: http://covid19.laiyaconsulting.com
 
 - I am actively updating the package. Please visit again for the latest version!
 
