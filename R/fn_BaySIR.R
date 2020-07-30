@@ -239,6 +239,10 @@ BaySIR_MCMC = function(B, I_D_0, N,
 
   }
 
+  ## Parameter Initialization
+  initialization_mistake = 0
+  
+  ## Method 1:
   I_U_spls[1, 1] = 5 * I_D_spls[1, 1]
   S_spls[1, 1] = N - I_U_spls[1, 1] - I_D_spls[1, 1]
   R_U_spls[1, 1] = 0
@@ -273,15 +277,104 @@ BaySIR_MCMC = function(B, I_D_0, N,
     # print(sprintf("Try again, BRN_start = %.2f, BRN_end = %.2f", BRN_start, BRN_end))
     
     if (BRN_start > 30) {
-      stop("Parameter initialization fails...")
+      initialization_mistake = 1
+      break
     }
     
   }
-  
-  
+
   eta_spls[ , 1] = c(-1.4, rep(0, K-1))
   sigma_gamma_spls[1] = 0.01
   
+  
+  ## Parameter Initialization
+  ## Method 2:
+  if (initialization_mistake == 1) {
+    
+    # Reset parameters
+    S_spls = matrix(0, T + 1, niter)
+    I_U_spls = matrix(0, T + 1, niter)
+    R_U_spls = matrix(0, T + 1, niter)
+    
+    beta_spls = matrix(0, T + 1, niter)
+    mu_spls = matrix(0, Q, niter)
+    sigma_beta_spls = rep(0, niter)
+    rho_spls = rep(0, niter)
+    
+    gamma_spls = matrix(0, T + 1, niter)
+    eta_spls = matrix(0, K, niter)
+    sigma_gamma_spls = rep(0, niter)
+
+
+    ## Method 2:
+    B_smooth = smooth.spline(x = 1:(T+1), y = log(B), cv = TRUE)
+    B_smooth = exp(B_smooth$y)
+    
+    eta_spls[ , 1] = c(-1.75, rep(0, K - 1))
+    gamma_tilde_mean = Y %*% eta_spls[ , 1]
+    sigma_gamma_spls[1] = 0.05
+
+    gamma_spls[1, 1] = rnorm(1, gamma_tilde_mean[1], sigma_gamma_spls[1])
+    gamma_spls[1, 1] = 1 / (1 + exp(-gamma_spls[1, 1]))
+
+    for (t in 1:T) {
+      
+      gamma_upper_bound = B_smooth[t + 1] * gamma_spls[t, 1] / 
+        ((1 - alpha_spls[1]) * B_smooth[t] * (1 - gamma_spls[t, 1]))
+    
+      gamma_counter = 0
+      
+      while (gamma_spls[t + 1, 1] <= 0 | gamma_spls[t + 1, 1] >= min(gamma_upper_bound, 1) ) {
+        gamma_spls[t + 1, 1] = rnorm(1, gamma_tilde_mean[t + 1], sigma_gamma_spls[1])
+        gamma_spls[t + 1, 1] = 1 / (1 + exp(-gamma_spls[t + 1, 1]))
+        gamma_counter = gamma_counter + 1
+        if(gamma_counter > 300) {
+          stop("Parameter initialization fails...")
+        }
+      }
+
+    }
+    
+    for (t in 1:(T+1)) {
+      I_U_spls[t, 1] = B_smooth[t] / (gamma_spls[t, 1] * (1 - alpha_spls[1]))
+    }
+    
+    R_U_spls[1, 1] = 0
+    for (t in 1:T) {
+      R_U_spls[t + 1, 1] = R_U_spls[t, 1] + alpha_spls[1] * I_U_spls[t, 1]
+    }
+    
+    S_spls[ , 1] = N - I_U_spls[ , 1] - I_D_spls[ , 1] - 
+                   R_U_spls[ , 1] - R_D_spls[ , 1]
+    
+    for (t in 1:T) {
+      beta_spls[t, 1] = (I_U_spls[t + 1, 1] - 
+                        (1 - alpha_spls[1]) * (1 - gamma_spls[t, 1]) * I_U_spls[t, 1]) *
+                        N / (S_spls[t, 1] * (I_U_spls[t, 1] + I_D_spls[t, 1]))
+    }
+    
+    beta_spls[T + 1, 1] = beta_spls[T, 1]
+    
+    if (any(S_spls[ , 1] <= 0) | any(I_U_spls[ , 1] <= 0) | 
+        any(R_U_spls[2:(T+1), 1] <= 0) | any(beta_spls[ , 1] <= 0)) {
+      
+      stop("Parameter initialization fails...")
+
+    } else {
+      
+      times = 1:(T+1)
+      lmfit_logbeta = lm(log(beta_spls[ , 1]) ~ times)
+      
+      mu_spls[ , 1] = lmfit_logbeta$coefficients
+      rho_spls[1] = 0.5
+      sigma_beta_spls[1] = sigma(lmfit_logbeta)
+
+    }
+
+  }
+  
+
+  print("Parameter initialization successful.")
 
   
 
