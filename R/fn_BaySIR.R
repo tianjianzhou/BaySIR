@@ -366,7 +366,7 @@ BaySIR_MCMC = function(B, I_D_0, N,
       lmfit_logbeta = lm(log(beta_spls[ , 1]) ~ times)
       
       mu_spls[ , 1] = lmfit_logbeta$coefficients
-      rho_spls[1] = 0.5
+      rho_spls[1] = 0.9
       sigma_beta_spls[1] = sigma(lmfit_logbeta)
 
     }
