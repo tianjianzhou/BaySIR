@@ -93,6 +93,27 @@ predict_list$pred_summary$B[ , 1]
 predict_list$pred_summary$R_eff
 ```
 
+### Plot the Results
+We did not provide a plot function in the package. To plot the estimates, please use the R function `plot()` or the `ggplot2` package. An example is given below, plotting the estimated effective reproduction numbers
+```
+library(ggplot2)
+
+R_eff_median = result_list$MCMC_summary$R_eff[ , 1]
+R_eff_lower = result_list$MCMC_summary$R_eff[ , 2]
+R_eff_upper = result_list$MCMC_summary$R_eff[ , 3]
+
+R_eff_df = data.frame(t = 0:(length(R_eff_median)-1), 
+                      m = R_eff_median,
+                      l = R_eff_lower,
+                      u = R_eff_upper)
+
+plot_R_eff = ggplot() + geom_line(data = R_eff_df, aes(x = t, y = m), size = 0.6)  +
+      geom_ribbon(data = R_eff_df, aes(x = t, ymin = l, ymax = u), alpha = 0.5, fill = "grey60") +
+      labs(x = "Day", y = "Eff. Reprod. No.")
+
+plot_R_eff
+```
+
 ## Documentation
 
 ### 1. BaySIR_MCMC
