@@ -4,7 +4,7 @@ Title: BaySIR
 Version: 1.0
 Author: Tianjian Zhou
 Description: Semiparametric Bayesian Inference for the Transmission Dynamics of COVID-19 with a State-space  Model
-Depends: R (>= 3.5.1)
+Depends: R (>= 3.5.0)
 License: GPL-3 | file LICENSE
 Imports: Rcpp (>= 0.12.9)
 LinkingTo: Rcpp, RcppArmadillo
