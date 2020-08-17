@@ -94,7 +94,7 @@ predict_list$pred_summary$R_eff
 ```
 
 ### Plot the Results
-We did not provide a plot function in the package. To plot the estimates, please use the R function `plot()` or the `ggplot2` package. An example is given below, plotting the estimated effective reproduction numbers
+We did not provide a plot function in the package. To plot the estimates, please use the R function `plot()` or the `ggplot2` package. An example is given below, plotting the estimated effective reproduction numbers.
 ```
 library(ggplot2)
 
