@@ -1,7 +1,11 @@
 # BaySIR
 **Semiparametric Bayesian Inference for the Transmission Dynamics of COVID-19 with a State-Space Model**
 
-- Link to the manuscript: http://arxiv.org/abs/2006.05581
+- The manuscript has been published in *Contemporary Clinical Trials (Special Issue on COVID-19)*
+
+- Link to the manuscript: https://doi.org/10.1016/j.cct.2020.106146
+
+- arXiv version: http://arxiv.org/abs/2006.05581
 
 - For analysis results of U.S. data, see this webpage: http://covid19.laiyaconsulting.com/baysir
 
