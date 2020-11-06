@@ -248,23 +248,37 @@ BaySIR_MCMC = function(B, I_D_0, N,
   rho_spls[1] = 0.9
   sigma_beta_spls[1] = 0.02
   
-  # basic 
-  BRN_start = 2
-  BRN_mid = 1.1
-  BRN_end = 1
+  # Set initial values for the daily transmission rate, beta
+  # Use a piecewise linear form  
+  n_T_fragment = ceiling((T + 1) / 50)
+  n_T_breakpoint = n_T_fragment + 1
+  
+  T_breakpoint = 
+    ceiling((0:(n_T_breakpoint - 1) * T / (n_T_breakpoint - 1))) + 1
 
-  while (any(I_U_spls[ , 1] <= 0) | 
-         any(gamma_spls[ , 1] <= 0) |
-         any(gamma_spls[ , 1] >= 1)) {
-
-    if ((T + 1) > 40) {
-      beta_spls[1:40, 1] = seq(BRN_start, BRN_mid, length.out = 40) * alpha_spls[1]
-      beta_spls[40:(T + 1), 1] = seq(BRN_mid, BRN_end, length.out = T-38) * alpha_spls[1]
+  BRN_all = list()
+  for(ntb in 1:n_T_breakpoint) {
+    if(ntb == 1) {
+      BRN_all[[ntb]] = seq(1, 9, 0.5)
     } else {
-      beta_spls[1:(T + 1), 1] = seq(BRN_start, BRN_mid, length.out = T + 1) * alpha_spls[1]
+      BRN_all[[ntb]] = seq(1, 7, 0.5)
+    }
+  }
+
+  BRN_all = as.matrix(expand.grid(BRN_all))
+
+
+  for (kk in 1:nrow(BRN_all)) {
+    
+    BRN = BRN_all[kk, ]
+
+    for(tbb in 1:(n_T_breakpoint - 1)) {
+      beta_spls[T_breakpoint[tbb]:T_breakpoint[tbb + 1], 1] = 
+        seq(BRN[tbb], BRN[tbb + 1], 
+            length.out = T_breakpoint[tbb + 1] - T_breakpoint[tbb] + 1) * 
+          alpha_spls[1]
     }
     
-
     for (t in 1:T) {
     
       A_t = beta_spls[t, 1] * S_spls[t, 1] * (I_U_spls[t, 1] + kappa * I_D_spls[t, 1]) / N
@@ -275,21 +289,19 @@ BaySIR_MCMC = function(B, I_D_0, N,
     }
     
     gamma_spls[ , 1] = B / ((1 - alpha_spls[1]) * I_U_spls[ , 1])
-
-    BRN_start = BRN_start + 0.05
-    # BRN_end = BRN_end + 0.05
-    # print(sprintf("BRN_start = %.2f, BRN_mid = %.2f", BRN_start, BRN_mid))
     
-    if (BRN_start > 10) {
-      if (BRN_mid < 6) {
-        BRN_mid = BRN_mid + 0.05
-        BRN_start = max(2, BRN_mid)
-      } else {
-        stop("Parameter initialization fails...")
-      }
-      
+    if(all(I_U_spls[ , 1] > 0) & 
+       all(gamma_spls[ , 1] > 0) &
+       all(gamma_spls[ , 1] < 1)) {
+      break
     }
     
+  }
+  
+  if (any(I_U_spls[ , 1] <= 0) | 
+      any(gamma_spls[ , 1] <= 0) |
+      any(gamma_spls[ , 1] >= 1)) {
+    stop("Parameter initialization fails...")
   }
   
   times = 1:(T+1)
