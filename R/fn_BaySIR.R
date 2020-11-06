@@ -158,6 +158,10 @@ BaySIR_MCMC = function(B, I_D_0, N,
   # B: length T + 1 vector, avoid gamma being 0
   B[B == 0] = 1
   T = length(B) - 1
+  
+  if (T < 4) {
+    stop("Must have COVID data for at least 5 days.")
+  }
 
   # may change 
   if (is.null(X)) {
